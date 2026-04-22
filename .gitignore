@@ -1,0 +1,14 @@
+/target/
+.env
+.env.*
+!.env.example
+/data/
+*.log
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+!.sqlx/
+seeds/policies/
+seeds/*.json
+!seeds/example_pack/
