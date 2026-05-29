@@ -1,0 +1,43 @@
+<form method="post" action="{{ action_url }}" hx-post="{{ action_url }}" hx-target="#drawer-body" class="stack-md">
+  <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+  <div class="form-group">
+    <label class="form-label" for="user_email">E-Mail-Adresse</label>
+    <input class="input" id="user_email" name="email" type="email" required value="{{ email }}" {% if is_edit %}disabled{% endif %}>
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="user_full_name">Vollständiger Name</label>
+    <input class="input" id="user_full_name" name="full_name" type="text" required maxlength="255" value="{{ full_name }}">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="user_role">Rolle</label>
+    <select class="select" id="user_role" name="role">
+      <option value="admin" {% if selected_role == "admin" %}selected{% endif %}>Admin</option>
+      <option value="iso" {% if selected_role == "iso" %}selected{% endif %}>ISB (iso)</option>
+      <option value="owner" {% if selected_role == "owner" %}selected{% endif %}>Verantwortlicher (owner)</option>
+      <option value="auditor" {% if selected_role == "auditor" %}selected{% endif %}>Prüfer (auditor, Read-Only)</option>
+      <option value="employee" {% if selected_role == "employee" %}selected{% endif %}>Mitarbeitende (employee)</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="user_unit">Organisationseinheit</label>
+    <select class="select" id="user_unit" name="organization_unit_id">
+      <option value="">– Keine –</option>
+      {% for u in units %}
+      <option value="{{ u.id }}" {% if u.id.to_string() == selected_unit_id %}selected{% endif %}>{{ u.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="user_expires">Ablaufdatum (optional, z. B. für Prüfer)</label>
+    <input class="input" id="user_expires" name="expires_at" type="date" value="{{ expires_date }}">
+  </div>
+  {% if !is_edit %}
+  <div class="form-group">
+    <label class="form-label" for="user_password">Initiales Passwort (optional bei OIDC, sonst ≥ 12 Zeichen)</label>
+    <input class="input" id="user_password" name="password" type="password" autocomplete="new-password">
+  </div>
+  {% endif %}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+  </div>
+</form>

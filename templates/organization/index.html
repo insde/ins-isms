@@ -1,0 +1,82 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Organisation &amp; Einheiten</h1>
+    <p class="page-subtitle">Organisationsprofil, Geltungsbereich (ISO 27001 Kap. 4.3) und Aufbauorganisation</p>
+  </div>
+  {% if can_edit_profile %}
+  <div class="toolbar-group">
+    <button type="button" class="btn" hx-get="/organization/profile/edit" hx-target="#drawer-body">
+      Profil bearbeiten
+    </button>
+    {% if can_manage_units %}
+    <button type="button" class="btn btn-primary" data-shortcut="c" hx-get="/organization/units/new" hx-target="#drawer-body">
+      Neue Einheit <kbd>c</kbd>
+    </button>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<section class="card stack-sm">
+  <div class="toolbar" style="padding:0 0 10px 0;">
+    <h2 style="margin:0; font-size:15px;">Organisationsprofil</h2>
+    <span class="badge badge-info">{{ profile.frameworks_display }}</span>
+  </div>
+  <dl class="drawer-meta">
+    <dt>Organisation</dt>
+    <dd>{{ profile.company_name }}</dd>
+    <dt>Geltungsbereich</dt>
+    <dd>{% if profile.scope_statement.is_empty() %}<span class="muted">Nicht definiert</span>{% else %}{{ profile.scope_statement }}{% endif %}</dd>
+    {% if can_edit_profile %}
+    <dt>PDF-Corporate-Design</dt>
+    <dd>
+      <a class="btn btn-sm" href="/organization/pdf-theme.typ">Standard-Vorlage (<code>theme.typ</code>) herunterladen</a>
+      <span class="muted" style="margin-left:0.5rem;">Für update-sichere Anpassungen unter <code>PDF_TEMPLATE_DIR/theme.typ</code> ablegen.</span>
+    </dd>
+    {% endif %}
+  </dl>
+</section>
+
+{% if can_view_units %}
+<section class="table-card">
+  <div class="toolbar">
+    <strong style="font-size:14px;">Organisationseinheiten ({{ units.len() }})</strong>
+    {% if can_manage_units %}
+    <button type="button" class="btn btn-sm" hx-get="/organization/units/new" hx-target="#drawer-body">Einheit hinzufügen</button>
+    {% endif %}
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Übergeordnete Einheit</th>
+          <th>Leitung</th>
+          {% if can_manage_units %}<th>Aktionen</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% if units.is_empty() %}
+        <tr><td colspan="4" class="muted">Noch keine Organisationseinheiten angelegt.</td></tr>
+        {% else %}
+        {% for unit in units %}
+        <tr>
+          <td><strong>{{ unit.name }}</strong></td>
+          <td>{{ unit.parent_name }}</td>
+          <td>{{ unit.lead_user_name }}</td>
+          {% if can_manage_units %}
+          <td>
+            <button type="button" class="btn btn-sm" hx-get="/organization/units/{{ unit.id }}/edit" hx-target="#drawer-body">Bearbeiten</button>
+            <button type="button" class="btn btn-sm btn-danger"
+                    hx-post="/organization/units/{{ unit.id }}/delete"
+                    hx-confirm="Einheit wirklich löschen?">Löschen</button>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}

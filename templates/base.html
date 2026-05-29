@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} · ins-isms</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
+  <script src="/static/keyboard.js" defer></script>
+  <script src="/static/markdown_editor.js" defer></script>
+</head>
+<body hx-headers='{"X-CSRF-Token":"{{ csrf_token }}"}'>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Hauptnavigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>
+      </span>
+      <span>ins-isms</span>
+    </div>
+
+    <nav>
+      <div class="nav-group-label">Übersicht</div>
+      <ul class="nav-list">
+        <li><a class="nav-link{% if active_nav == "dashboard" %} active{% endif %}" href="/"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</span></a></li>
+      </ul>
+    </nav>
+
+    <nav>
+      <div class="nav-group-label">Inventar &amp; Schutzbedarf</div>
+      <ul class="nav-list">
+        <li><a class="nav-link{% if active_nav == "organization" %} active{% endif %}" href="/organization"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>Organisation &amp; Einheiten</span></a></li>
+        <li><a class="nav-link{% if active_nav == "assets" %} active{% endif %}" href="/organization/assets"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>System-Assets</span></a></li>
+        <li><a class="nav-link{% if active_nav == "classification" %} active{% endif %}" href="/classification"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>Klassifizierung</span></a></li>
+      </ul>
+    </nav>
+
+    <nav>
+      <div class="nav-group-label">Governance &amp; Compliance</div>
+      <ul class="nav-list">
+        <li><a class="nav-link{% if active_nav == "documents" %} active{% endif %}" href="/documents"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Dokumente &amp; Richtlinien</span></a></li>
+        <li><a class="nav-link{% if active_nav == "soa" %} active{% endif %}" href="/soa"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>SoA &amp; Controls</span></a></li>
+        <li><a class="nav-link{% if active_nav == "risks" %} active{% endif %}" href="/risks"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Risikomanagement</span></a></li>
+      </ul>
+    </nav>
+
+    <nav>
+      <div class="nav-group-label">Betrieb (PDCA &amp; NIS2)</div>
+      <ul class="nav-list">
+        <li><a class="nav-link{% if active_nav == "actions" %} active{% endif %}" href="/actions"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Maßnahmen &amp; CAPA</span></a></li>
+        <li><a class="nav-link{% if active_nav == "incidents" %} active{% endif %}" href="/incidents"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Sicherheitsvorfälle</span></a></li>
+        <li><a class="nav-link{% if active_nav == "audits" %} active{% endif %}" href="/audits"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>Interne Audits &amp; Review</span></a></li>
+      </ul>
+    </nav>
+
+    <nav>
+      <div class="nav-group-label">Nachweis &amp; System</div>
+      <ul class="nav-list">
+        <li><a class="nav-link{% if active_nav == "audit_logs" %} active{% endif %}" href="/audit-logs"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Audit-Log</span></a></li>
+        <li><a class="nav-link{% if active_nav == "exports" %} active{% endif %}" href="/exports"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exporte &amp; Import</span></a></li>
+        <li><a class="nav-link{% if active_nav == "settings" %} active{% endif %}" href="/settings/users"><span class="nav-link-left"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1.02 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Benutzer &amp; Einstellungen</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-column">
+    <header class="topbar">
+      <div class="breadcrumbs">
+        <span>{{ section }}</span> <span>/</span> <strong>{{ title }}</strong>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="palette-trigger" id="palette-open">
+          <span>Suche &amp; Schnellaktionen…</span>
+          <kbd>Ctrl+K</kbd>
+        </button>
+        <button type="button" class="btn btn-sm theme-toggle" id="theme-toggle" aria-label="Farbschema umschalten">Dunkel</button>
+        <a class="user-badge" href="/account" title="Mein Konto &amp; Passwort">{{ user_name }} · <strong>{{ user_role_label }}</strong></a>
+        <form method="post" action="/logout" class="inline-form">
+          <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+          <button type="submit" class="btn btn-sm">Abmelden</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="content" id="main-content">
+      {{ content|safe }}
+    </main>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<aside class="detail-drawer" id="detail-drawer" aria-label="Detailansicht">
+  <div class="drawer-header">
+    <h2 class="drawer-title" id="drawer-title">Details</h2>
+    <button type="button" class="btn btn-sm" id="drawer-close" aria-label="Schließen">Schließen <kbd>Esc</kbd></button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<dialog class="command-palette" id="command-palette" aria-label="Schnellsuche">
+  <div class="palette-head">
+    <input class="palette-input" id="palette-input" name="q" type="search"
+           placeholder="Suchen nach Seiten, System-Assets, Einheiten, Benutzern…"
+           autocomplete="off"
+           hx-get="/search/palette"
+           hx-trigger="input changed delay:150ms, focus"
+           hx-target="#palette-results">
+    <kbd>Esc</kbd>
+  </div>
+  <ul class="palette-list" id="palette-results"></ul>
+  <div class="palette-foot">
+    <span><kbd>Ctrl+K</kbd> Öffnen/Schließen</span>
+    <span><kbd>j</kbd> / <kbd>k</kbd> Zeilen · <kbd>Enter</kbd> Details</span>
+  </div>
+</dialog>
+
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+</body>
+</html>

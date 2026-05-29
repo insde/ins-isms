@@ -1,0 +1,80 @@
+<form method="post" action="{{ action_url }}" hx-post="{{ action_url }}" hx-target="#drawer-body" class="stack-md">
+  <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+  <p class="muted" style="margin:0; font-size:12px;">Erfassen Sie logische System- oder Gerätegruppen, physische Standorte sowie kritische IT- und Cloud-Dienstleister statt einzelner Seriennummern.</p>
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label" for="asset_code">Asset-Code</label>
+      <input class="input" id="asset_code" name="asset_code" type="text" required maxlength="32" placeholder="SYS-001" value="{{ asset_code }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="asset_type">Typ</label>
+      <select class="select" id="asset_type" name="asset_type">
+        <option value="server" {% if asset_type == "server" %}selected{% endif %}>Server / Infrastruktur</option>
+        <option value="application" {% if asset_type == "application" %}selected{% endif %}>Anwendung / Software</option>
+        <option value="cloud_service" {% if asset_type == "cloud_service" %}selected{% endif %}>Cloud-Dienst</option>
+        <option value="network" {% if asset_type == "network" %}selected{% endif %}>Netzwerk</option>
+        <option value="endpoint" {% if asset_type == "endpoint" %}selected{% endif %}>Endgerät (Gruppe)</option>
+        <option value="facility" {% if asset_type == "facility" %}selected{% endif %}>Standort / Raum</option>
+        <option value="ot_equipment" {% if asset_type == "ot_equipment" %}selected{% endif %}>Maschine / OT-Anlage</option>
+        <option value="vendor" {% if asset_type == "vendor" %}selected{% endif %}>Dienstleister / Lieferant</option>
+        <option value="other" {% if asset_type == "other" %}selected{% endif %}>Sonstiges Asset</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="asset_name">Name</label>
+    <input class="input" id="asset_name" name="name" type="text" required maxlength="200" value="{{ name }}">
+  </div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label" for="owner_unit_id">Organisationseinheit</label>
+      <select class="select" id="owner_unit_id" name="owner_unit_id">
+        <option value="">– Keine –</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if u.id.to_string() == selected_unit_id %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="owner_user_id">Verantwortliche Person</label>
+      <select class="select" id="owner_user_id" name="owner_user_id">
+        <option value="">– Keine –</option>
+        {% for usr in users %}
+        <option value="{{ usr.id }}" {% if usr.id.to_string() == selected_owner_id %}selected{% endif %}>{{ usr.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label" for="vendor_name">Anbieter / Lieferant</label>
+      <input class="input" id="vendor_name" name="vendor_name" type="text" maxlength="200" value="{{ vendor_name }}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="hosting_location">Standort / Hosting</label>
+      <input class="input" id="hosting_location" name="hosting_location" type="text" maxlength="100" placeholder="z. B. Deutschland / EU" value="{{ hosting_location }}">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="criticality">Kritikalität</label>
+    <select class="select" id="criticality" name="criticality">
+      <option value="low" {% if criticality == "low" %}selected{% endif %}>Niedrig</option>
+      <option value="normal" {% if criticality == "normal" %}selected{% endif %}>Normal</option>
+      <option value="high" {% if criticality == "high" %}selected{% endif %}>Hoch</option>
+      <option value="critical" {% if criticality == "critical" %}selected{% endif %}>Kritisch</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label" for="description">Beschreibung</label>
+    <textarea class="textarea" id="description" name="description">{{ description }}</textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+  </div>
+</form>

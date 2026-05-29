@@ -1,0 +1,19 @@
+<form method="post" action="/organization/profile" hx-post="/organization/profile" hx-target="#drawer-body" class="stack-md">
+  <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+  <div class="form-group">
+    <label class="form-label" for="company_name">Organisationsname</label>
+    <input class="input" id="company_name" name="company_name" type="text" required maxlength="255" value="{{ company_name }}">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="scope_statement">Geltungsbereich (Scope Statement)</label>
+    <textarea class="textarea textarea-lg" id="scope_statement" name="scope_statement">{{ scope_statement }}</textarea>
+  </div>
+  <div class="form-group">
+    <span class="form-label">Ziel-Frameworks</span>
+    <label><input type="checkbox" name="fw_iso27001" value="1" {% if has_iso27001 %}checked{% endif %}> ISO/IEC 27001:2022</label>
+    <label><input type="checkbox" name="fw_nis2" value="1" {% if has_nis2 %}checked{% endif %}> NIS2 / BSIG (§§ 30, 32)</label>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Profil speichern</button>
+  </div>
+</form>

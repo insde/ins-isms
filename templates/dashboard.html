@@ -1,0 +1,68 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">ISMS-Übersicht · {{ company_name }}</h1>
+    <p class="page-subtitle">ISO/IEC 27001:2022 &amp; NIS2 · Angemeldet als {{ user_name }} ({{ user_role_label }})</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn" href="/documents">Richtlinien</a>
+    <a class="btn" href="/incidents/report">Vorfall melden</a>
+    {% if can_view_assets %}
+    <a class="btn" href="/soa">SoA &amp; Controls</a>
+    <a class="btn" href="/risks">Risikoregister</a>
+    <a class="btn" href="/audits">Audits ({{ audit_open_nc_count }} NC)</a>
+    <a class="btn" href="/management-reviews">Management-Review</a>
+    <a class="btn" href="/actions">Maßnahmen ({{ action_open_count }})</a>
+    <a class="btn btn-primary" href="/incidents">Vorfälle ({{ incident_open_count }})</a>
+    {% endif %}
+  </div>
+</div>
+
+<section class="kpi-grid" aria-label="Kennzahlen">
+  <div class="card">
+    <div class="kpi-label">Informationswerte &amp; Systeme</div>
+    <div class="kpi-value">{{ info_asset_count }} / {{ asset_count }}</div>
+    <div class="kpi-meta">{{ unit_count }} Einheiten · {{ active_user_count }} aktive Benutzer</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Richtlinien freigegeben</div>
+    <div class="kpi-value">{{ doc_approved_count }} / {{ doc_total_count }}</div>
+    <div class="kpi-meta">ISO 7.5 gelenkte Dokumente</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">ISO 27001 SoA</div>
+    <div class="kpi-value">{{ soa_implemented_count }} / {{ soa_applicable_count }}</div>
+    <div class="kpi-meta">Umgesetzte anwendbare Controls</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Risiken &amp; Vorfälle</div>
+    <div class="kpi-value">{{ risk_high_critical_count }} / {{ incident_open_count }}</div>
+    <div class="kpi-meta">{{ risk_total_count }} Risiken · {{ risk_overdue_count }} Reviews fällig · {{ incident_nis2_open_count }} NIS2 offen · {{ audit_open_nc_count }} offene NCs · {{ action_open_count }} Maßnahmen ({{ action_overdue_count }} überfällig) · {{ audit_count }} Audit-Logs</div>
+  </div>
+</section>
+
+<section class="grid-2">
+  <div class="card stack-sm">
+    <h2 style="margin:0; font-size:15px;">Geltungsbereich (Scope)</h2>
+    {% if scope_statement.is_empty() %}
+    <p class="muted" style="margin:0;">Noch kein Geltungsbereich hinterlegt. Bitte unter Organisation pflegen.</p>
+    {% else %}
+    <p style="margin:0;">{{ scope_statement }}</p>
+    {% endif %}
+    <div class="form-actions">
+      <a class="btn btn-sm" href="/organization">Profil bearbeiten</a>
+    </div>
+  </div>
+
+  <div class="card stack-sm">
+    <h2 style="margin:0; font-size:15px;">Tastatur-Schnellstart</h2>
+    <p class="muted" style="margin:0;">
+      Drücken Sie <kbd>Ctrl+K</kbd> für die globale Suche, <kbd>j</kbd>/<kbd>k</kbd> zur Zeilennavigation in Tabellen und <kbd>Enter</kbd> für Details im Drawer.
+    </p>
+    <div class="form-actions">
+      <a class="btn btn-sm" href="/account">Mein Konto &amp; Passwort</a>
+      {% if can_view_audit %}
+      <a class="btn btn-sm" href="/audit-logs">Audit-Log prüfen</a>
+      {% endif %}
+    </div>
+  </div>
+</section>

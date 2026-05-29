@@ -1,0 +1,46 @@
+<dl class="drawer-meta">
+  <dt>Asset-Code</dt>
+  <dd><span class="code-pill">{{ asset.asset_code }}</span></dd>
+  <dt>Name</dt>
+  <dd><strong>{{ asset.name }}</strong></dd>
+  <dt>Typ</dt>
+  <dd>{{ asset.asset_type_label }}</dd>
+  <dt>Kritikalität</dt>
+  <dd><span class="badge badge-{{ asset.criticality_code }}">{{ asset.criticality_label }}</span></dd>
+  <dt>Eff. Schutzbedarf</dt>
+  <dd><span class="badge {{ asset.effective_badge_css }}">{{ asset.effective_level_code }}</span></dd>
+  <dt>CIA-Maximum</dt>
+  <dd>{{ asset.effective_cia_summary }}</dd>
+  <dt>Einheit</dt>
+  <dd>{{ asset.owner_unit_name }}</dd>
+  <dt>Verantwortlich</dt>
+  <dd>{{ asset.owner_user_name }}</dd>
+  <dt>Lieferant</dt>
+  <dd>{{ asset.vendor_name }}</dd>
+  <dt>Hosting</dt>
+  <dd>{{ asset.hosting_location }}</dd>
+</dl>
+
+{% if !asset.description.is_empty() %}
+<div class="drawer-section">
+  <h4>Beschreibung</h4>
+  <p style="margin:0; font-size:13px;">{{ asset.description }}</p>
+</div>
+{% endif %}
+
+{% if can_edit || can_delete %}
+<div class="drawer-section form-actions">
+  {% if can_edit %}
+  <button type="button" class="btn btn-primary" hx-get="/organization/assets/{{ asset.id }}/edit" hx-target="#drawer-body">
+    Bearbeiten
+  </button>
+  {% endif %}
+  {% if can_delete %}
+  <button type="button" class="btn btn-danger"
+          hx-post="/organization/assets/{{ asset.id }}/delete"
+          hx-confirm="System-Asset {{ asset.asset_code }} wirklich löschen?">
+    Löschen
+  </button>
+  {% endif %}
+</div>
+{% endif %}

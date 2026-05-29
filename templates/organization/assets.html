@@ -1,0 +1,83 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">System-Assets</h1>
+    <p class="page-subtitle">Erfassen Sie logische System- oder Gerätegruppen, physische Standorte sowie kritische IT- und Cloud-Dienstleister statt einzelner Seriennummern (ISO A.5.9 / A.5.19).</p>
+  </div>
+  {% if can_create %}
+  <div class="toolbar-group">
+    <button type="button" class="btn btn-primary" data-shortcut="c" hx-get="/organization/assets/new" hx-target="#drawer-body">
+      Neues System-Asset <kbd>c</kbd>
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<section class="table-card">
+  <div class="toolbar">
+    <form method="get" action="/organization/assets" class="toolbar-group">
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code, Name oder Lieferant…">
+      <select class="select" name="asset_type">
+        <option value="">Alle Typen</option>
+        <option value="server" {% if filter_type == "server" %}selected{% endif %}>Server / Infrastruktur</option>
+        <option value="application" {% if filter_type == "application" %}selected{% endif %}>Anwendung / Software</option>
+        <option value="cloud_service" {% if filter_type == "cloud_service" %}selected{% endif %}>Cloud-Dienst</option>
+        <option value="network" {% if filter_type == "network" %}selected{% endif %}>Netzwerk</option>
+        <option value="endpoint" {% if filter_type == "endpoint" %}selected{% endif %}>Endgerät (Gruppe)</option>
+        <option value="facility" {% if filter_type == "facility" %}selected{% endif %}>Standort / Raum</option>
+        <option value="ot_equipment" {% if filter_type == "ot_equipment" %}selected{% endif %}>Maschine / OT-Anlage</option>
+        <option value="vendor" {% if filter_type == "vendor" %}selected{% endif %}>Dienstleister / Lieferant</option>
+        <option value="other" {% if filter_type == "other" %}selected{% endif %}>Sonstiges Asset</option>
+      </select>
+      <select class="select" name="criticality">
+        <option value="">Alle Kritikalitäten</option>
+        <option value="low" {% if filter_criticality == "low" %}selected{% endif %}>Niedrig</option>
+        <option value="normal" {% if filter_criticality == "normal" %}selected{% endif %}>Normal</option>
+        <option value="high" {% if filter_criticality == "high" %}selected{% endif %}>Hoch</option>
+        <option value="critical" {% if filter_criticality == "critical" %}selected{% endif %}>Kritisch</option>
+      </select>
+      <button type="submit" class="btn btn-sm">Filtern</button>
+    </form>
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>Enter</kbd> Details</span>
+      {% if can_create %}<span><kbd>c</kbd> Neu</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Typ</th>
+          <th>Einheit</th>
+          <th>Verantwortlich</th>
+          <th>Standort / Hosting</th>
+          <th>Eff. Schutzstufe</th>
+          <th>Kritikalität</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if assets.is_empty() %}
+        <tr><td colspan="8" class="muted">Keine System-Assets gefunden.</td></tr>
+        {% else %}
+        {% for a in assets %}
+        <tr class="selectable-row"
+            data-title="{{ a.asset_code }} · {{ a.name }}"
+            data-drawer-url="/organization/assets/{{ a.id }}">
+          <td><span class="code-pill">{{ a.asset_code }}</span></td>
+          <td><strong>{{ a.name }}</strong></td>
+          <td>{{ a.asset_type_label }}</td>
+          <td>{{ a.owner_unit_name }}</td>
+          <td>{{ a.owner_user_name }}</td>
+          <td>{{ a.hosting_location }}</td>
+          <td><span class="badge {{ a.effective_badge_css }}" title="{{ a.effective_cia_summary }}">{{ a.effective_level_code }}</span></td>
+          <td><span class="badge badge-{{ a.criticality_code }}">{{ a.criticality_label }}</span></td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

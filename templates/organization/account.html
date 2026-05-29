@@ -1,0 +1,41 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mein Konto &amp; Sicherheit</h1>
+    <p class="page-subtitle">Profildaten einsehen und eigenes Passwort ändern</p>
+  </div>
+</div>
+
+<section class="grid-2">
+  <div class="card stack-sm">
+    <h2 style="margin:0; font-size:15px;">Benutzerprofil</h2>
+    <dl class="drawer-meta">
+      <dt>Name</dt>
+      <dd>{{ full_name }}</dd>
+      <dt>E-Mail</dt>
+      <dd>{{ email }}</dd>
+      <dt>Rolle</dt>
+      <dd><span class="badge badge-info">{{ role_label }}</span></dd>
+      <dt>Einheit</dt>
+      <dd>{{ unit_name }}</dd>
+    </dl>
+  </div>
+
+  <div class="card stack-md">
+    <h2 style="margin:0; font-size:15px;">Passwort ändern</h2>
+    <div id="password-feedback"></div>
+    <form method="post" action="/account/password" hx-post="/account/password" hx-target="#password-feedback" class="stack-sm">
+      <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label class="form-label" for="current_password">Aktuelles Passwort</label>
+        <input class="input" id="current_password" name="current_password" type="password" required autocomplete="current-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new_password">Neues Passwort (mind. 12 Zeichen)</label>
+        <input class="input" id="new_password" name="new_password" type="password" required minlength="12" autocomplete="new-password">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Passwort aktualisieren</button>
+      </div>
+    </form>
+  </div>
+</section>
