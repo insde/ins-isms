@@ -1,0 +1,26 @@
+{
+  "framework": {
+    "code": "DEMO_ISMS",
+    "name": "Beispiel-Regelwerk (Format-Referenz)",
+    "version": "1.0-EXAMPLE"
+  },
+  "controls": [
+    {
+      "code": "DEMO-01",
+      "domain": "Governance",
+      "sort_order": 1,
+      "title": "Beispiel-Anforderung: Sicherheitsverantwortung benennen",
+      "description": "Fiktiver Beispiel-Eintrag zur Demonstration des Katalog-JSON-Formats. Benennung einer verantwortlichen Person für Informationssicherheit.",
+      "audit_question": "Ist eine verantwortliche Person schriftlich benannt?"
+    },
+    {
+      "code": "DEMO-02",
+      "domain": "Technik",
+      "sort_order": 2,
+      "title": "Beispiel-Anforderung: Regelmäßige Datensicherung",
+      "description": "Fiktiver Beispiel-Eintrag zur Demonstration des Katalog-JSON-Formats. Einrichtung automatisierter Sicherungskopien kritischer Systeme.",
+      "audit_question": "Werden Sicherungskopien regelmäßig auf Wiederherstellbarkeit geprüft?"
+    }
+  ],
+  "mappings": []
+}
