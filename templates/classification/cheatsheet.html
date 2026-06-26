@@ -1,0 +1,59 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Informationsklassifizierung – Mitarbeiter-One-Pager</h1>
+    <p class="page-subtitle">Kompakte Orientierungshilfe für {{ company_name }} (ISO A.5.12 / A.5.13)</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn" href="/classification/levels">Zur Handling-Matrix</a>
+    <a class="btn btn-primary" href="/classification/export/cheatsheet.pdf">Als PDF herunterladen</a>
+  </div>
+</div>
+
+<div class="alert alert-info" style="margin-bottom:16px;">
+  <strong>Grundregel:</strong> Im Zweifel immer die höhere Schutzstufe wählen und Informationen vor jeder Weitergabe eindeutig kennzeichnen.
+</div>
+
+<section class="table-card" style="padding:16px; margin-bottom:16px;">
+  <h2 style="margin:0 0 12px; font-size:15px;">Schutzstufen im Überblick</h2>
+  <div class="form-grid">
+    {% for lvl in levels %}
+    <div style="padding:12px; border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+      <div style="margin-bottom:6px;">
+        <span class="badge {{ lvl.badge_css_class }}">{{ lvl.code }} · {{ lvl.name }}</span>
+      </div>
+      <p style="margin:0; font-size:13px;">{{ lvl.description }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="table-card">
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Umgang</th>
+          {% for lvl in levels %}
+          <th><span class="badge {{ lvl.badge_css_class }}">{{ lvl.code }} · {{ lvl.name }}</span></th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td><strong>{{ cat.label }}</strong></td>
+          {% for cell in cat.cells %}
+          <td style="font-size:13px;">
+            {% if let Some(rule) = cell %}
+              {{ rule.rule_text }}
+            {% else %}
+              <span class="muted">–</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

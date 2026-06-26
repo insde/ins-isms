@@ -1,0 +1,124 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Schutzstufen &amp; Handling-Matrix</h1>
+    <p class="page-subtitle">Verbindliche Umgangsregeln für C1–C4 über alle fünf Kategorien (ISO A.5.12 / A.5.13)</p>
+  </div>
+  <div class="toolbar-group">
+    {% if can_view_assets %}
+    <a class="btn" href="/classification/assets">Informationswerte-Inventar</a>
+    {% endif %}
+    <a class="btn" href="/classification/export/cheatsheet">Mitarbeiter-One-Pager</a>
+    <a class="btn" href="/classification/export/cheatsheet.pdf">One-Pager (PDF)</a>
+    <a class="btn" href="/classification/export/policy.pdf">Richtlinie (PDF)</a>
+    {% if can_edit %}
+    <button type="button" class="btn"
+            hx-post="/classification/levels/restore-defaults"
+            hx-confirm="Standardwerte für C1–C4 wiederherstellen? Bestehende Informationswerte bleiben erhalten.">
+      Standardwerte wiederherstellen
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<section class="table-card" style="margin-bottom: 18px;">
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Kategorie</th>
+          {% for lvl in levels %}
+          <th>
+            <span class="badge {{ lvl.badge_css_class }}">{{ lvl.code }} · {{ lvl.name }}</span>
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Definition</strong></td>
+          {% for lvl in levels %}
+          <td style="vertical-align:top; min-width:220px;">
+            {% if can_edit %}
+            <form hx-patch="/classification/levels/{{ lvl.id }}" hx-swap="none" class="stack-sm">
+              <input class="input" name="name" value="{{ lvl.name }}" required maxlength="100" aria-label="Name {{ lvl.code }}">
+              <textarea class="textarea" name="description" required aria-label="Beschreibung {{ lvl.code }}">{{ lvl.description }}</textarea>
+              <div class="form-actions">
+                <select class="select" name="badge_color" aria-label="Farbe {{ lvl.code }}">
+                  <option value="neutral" {% if lvl.badge_color == "neutral" %}selected{% endif %}>Neutral</option>
+                  <option value="info" {% if lvl.badge_color == "info" %}selected{% endif %}>Blau</option>
+                  <option value="warning" {% if lvl.badge_color == "warning" %}selected{% endif %}>Amber</option>
+                  <option value="danger" {% if lvl.badge_color == "danger" %}selected{% endif %}>Rot</option>
+                </select>
+                <button type="submit" class="btn btn-sm">Speichern</button>
+              </div>
+            </form>
+            {% else %}
+            <p style="margin:0; font-size:13px;">{{ lvl.description }}</p>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+
+        {% for cat in categories %}
+        <tr>
+          <td style="vertical-align:top;"><strong>{{ cat.label }}</strong></td>
+          {% for cell in cat.cells %}
+          <td style="vertical-align:top;">
+            {% if let Some(rule) = cell %}
+              {% if can_edit %}
+              <form hx-patch="/classification/rules/{{ rule.id }}" hx-swap="none" class="stack-sm">
+                <textarea class="textarea" name="rule_text" required aria-label="{{ cat.label }}">{{ rule.rule_text }}</textarea>
+                <div>
+                  <button type="submit" class="btn btn-sm">Regel speichern</button>
+                </div>
+              </form>
+              {% else %}
+              <p style="margin:0; font-size:13px;">{{ rule.rule_text }}</p>
+              {% endif %}
+            {% else %}
+              <span class="muted">–</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if can_edit %}
+<section class="table-card" style="padding:16px;">
+  <h2 style="margin:0 0 10px; font-size:15px;">Zusätzliche Schutzstufe anlegen</h2>
+  <form hx-post="/classification/levels" hx-swap="none" class="form-grid">
+    <div class="form-group">
+      <label class="form-label" for="lvl-code">Code *</label>
+      <input class="input" id="lvl-code" name="code" required maxlength="16" placeholder="z. B. C5">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="lvl-rank">Rang *</label>
+      <input class="input" id="lvl-rank" name="rank" type="number" min="1" value="5" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="lvl-name">Name *</label>
+      <input class="input" id="lvl-name" name="name" required maxlength="100" placeholder="z. B. Geheim">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="lvl-color">Farbe *</label>
+      <select class="select" id="lvl-color" name="badge_color">
+        <option value="neutral">Neutral</option>
+        <option value="info">Blau</option>
+        <option value="warning">Amber</option>
+        <option value="danger" selected>Rot</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label class="form-label" for="lvl-desc">Beschreibung *</label>
+      <textarea class="textarea" id="lvl-desc" name="description" required></textarea>
+    </div>
+    <div class="form-actions full">
+      <button type="submit" class="btn btn-primary">Schutzstufe anlegen</button>
+    </div>
+  </form>
+</section>
+{% endif %}

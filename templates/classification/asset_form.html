@@ -1,0 +1,99 @@
+<form hx-post="{{ action_url }}" hx-target="#drawer-body" class="stack-md">
+  <div class="form-grid">
+    <div class="form-group full">
+      <label class="form-label" for="ia-name">Name *</label>
+      <input class="input" id="ia-name" name="name" value="{{ name }}" required maxlength="200" placeholder="z. B. Kundendatenbank, Personalakten">
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label" for="ia-level">Schutzstufe *</label>
+      <select class="select" id="ia-level" name="classification_level_id" required>
+        {% for l in levels %}
+        <option value="{{ l.id }}" {% if classification_level_id == l.id %}selected{% endif %}>{{ l.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-c">Vertraulichkeit *</label>
+      <select class="select" id="ia-c" name="confidentiality">
+        <option value="normal" {% if confidentiality == "normal" %}selected{% endif %}>Normal</option>
+        <option value="high" {% if confidentiality == "high" %}selected{% endif %}>Hoch</option>
+        <option value="very_high" {% if confidentiality == "very_high" %}selected{% endif %}>Sehr hoch</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-i">Integrität *</label>
+      <select class="select" id="ia-i" name="integrity">
+        <option value="normal" {% if integrity == "normal" %}selected{% endif %}>Normal</option>
+        <option value="high" {% if integrity == "high" %}selected{% endif %}>Hoch</option>
+        <option value="very_high" {% if integrity == "very_high" %}selected{% endif %}>Sehr hoch</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-a">Verfügbarkeit *</label>
+      <select class="select" id="ia-a" name="availability">
+        <option value="normal" {% if availability == "normal" %}selected{% endif %}>Normal</option>
+        <option value="high" {% if availability == "high" %}selected{% endif %}>Hoch</option>
+        <option value="very_high" {% if availability == "very_high" %}selected{% endif %}>Sehr hoch</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-unit">Verantwortliche Einheit</label>
+      <select class="select" id="ia-unit" name="owner_unit_id">
+        <option value="">– Keine –</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if owner_unit_id == u.id %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-user">Verantwortliche Person</label>
+      <select class="select" id="ia-user" name="owner_user_id">
+        <option value="">– Keine –</option>
+        {% for u in users %}
+        <option value="{{ u.id }}" {% if owner_user_id == u.id %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-ret">Aufbewahrungsfrist</label>
+      <input class="input" id="ia-ret" name="retention_period" value="{{ retention_period }}" maxlength="100" placeholder="z. B. 10 Jahre nach HGB/AO">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ia-rev">Review-Intervall (Monate) *</label>
+      <input class="input" id="ia-rev" name="review_interval_months" type="number" min="1" max="60" value="{{ review_interval_months }}" required>
+    </div>
+
+    <div class="form-group full">
+      <label class="form-label" for="ia-desc">Beschreibung</label>
+      <textarea class="textarea" id="ia-desc" name="description" placeholder="Inhalt, Zweck und betroffene Datenkategorien">{{ description }}</textarea>
+    </div>
+
+    <div class="form-group full">
+      <span class="form-label">Verarbeitende System-Assets (Maximumprinzip)</span>
+      {% if systems.is_empty() %}
+      <p class="form-hint">Noch keine System-Assets angelegt.</p>
+      {% else %}
+      <div class="stack-sm" style="max-height:180px; overflow:auto; padding:8px; border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+        {% for s in systems %}
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+          <input type="checkbox" name="system_asset_ids" value="{{ s.id }}" {% if s.selected %}checked{% endif %}>
+          <span>{{ s.label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+  </div>
+</form>

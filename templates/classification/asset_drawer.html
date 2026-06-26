@@ -1,0 +1,60 @@
+<dl class="drawer-meta">
+  <dt>Informationswert</dt>
+  <dd><strong>{{ asset.name }}</strong></dd>
+  <dt>Schutzstufe</dt>
+  <dd><span class="badge {{ asset.badge_css_class }}">{{ asset.level_code }} · {{ asset.level_name }}</span></dd>
+  <dt>Vertraulichkeit</dt>
+  <dd><span class="badge {{ asset.confidentiality_css }}">{{ asset.confidentiality_label }}</span></dd>
+  <dt>Integrität</dt>
+  <dd><span class="badge {{ asset.integrity_css }}">{{ asset.integrity_label }}</span></dd>
+  <dt>Verfügbarkeit</dt>
+  <dd><span class="badge {{ asset.availability_css }}">{{ asset.availability_label }}</span></dd>
+  <dt>Einheit</dt>
+  <dd>{{ asset.owner_unit_name }}</dd>
+  <dt>Verantwortlich</dt>
+  <dd>{{ asset.owner_user_name }}</dd>
+  <dt>Aufbewahrung</dt>
+  <dd>{{ asset.retention_period }}</dd>
+  <dt>Review-Intervall</dt>
+  <dd>{{ asset.review_interval_months }} Monate (Letztes: {{ asset.last_reviewed_label }} · Nächstes: {{ asset.next_review_label }})</dd>
+</dl>
+
+{% if !asset.description.is_empty() %}
+<div class="drawer-section">
+  <h4>Beschreibung</h4>
+  <p style="margin:0; font-size:13px;">{{ asset.description }}</p>
+</div>
+{% endif %}
+
+<div class="drawer-section">
+  <h4>Verarbeitende System-Assets ({{ linked_systems.len() }})</h4>
+  {% if linked_systems.is_empty() %}
+  <p class="muted" style="margin:0; font-size:13px;">Noch keine IT-Systeme verknüpft.</p>
+  {% else %}
+  <ul style="margin:0; padding-left:18px; font-size:13px;">
+    {% for s in linked_systems %}
+    <li><span class="code-pill">{{ s.asset_code }}</span> <strong>{{ s.name }}</strong> ({{ s.criticality_label }})</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+{% if can_edit || can_delete %}
+<div class="drawer-section form-actions">
+  {% if can_edit %}
+  <button type="button" class="btn btn-primary" hx-get="/classification/assets/{{ asset.id }}/edit" hx-target="#drawer-body">
+    Bearbeiten
+  </button>
+  <button type="button" class="btn" hx-post="/classification/assets/{{ asset.id }}/review">
+    Als geprüft markieren
+  </button>
+  {% endif %}
+  {% if can_delete %}
+  <button type="button" class="btn btn-danger"
+          hx-post="/classification/assets/{{ asset.id }}/delete"
+          hx-confirm="Informationswert {{ asset.name }} wirklich löschen?">
+    Löschen
+  </button>
+  {% endif %}
+</div>
+{% endif %}

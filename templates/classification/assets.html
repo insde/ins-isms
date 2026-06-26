@@ -1,0 +1,104 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Informationswerte</h1>
+    <p class="page-subtitle">Klassifizierung von Informationen &amp; Kennzeichnungspflicht (ISO A.5.12 / A.5.13)</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn" href="/classification/levels">Schutzstufen &amp; Handling-Matrix</a>
+    <a class="btn" href="/classification/export/cheatsheet">Mitarbeiter-One-Pager</a>
+    <a class="btn" href="/classification/export/policy.pdf">Richtlinie (PDF)</a>
+    {% if can_create %}
+    <button type="button" class="btn btn-primary" data-shortcut="c" hx-get="/classification/assets/new" hx-target="#drawer-body">
+      Neuer Informationswert <kbd>c</kbd>
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<section class="table-card">
+  <div class="toolbar">
+    <form method="get" action="/classification/assets" class="toolbar-group">
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Name oder Beschreibung…">
+      <select class="select" name="level_id">
+        <option value="">Alle Schutzstufen</option>
+        {% for l in levels %}
+        <option value="{{ l.id }}" {% if filter_level_id == l.id %}selected{% endif %}>{{ l.label }}</option>
+        {% endfor %}
+      </select>
+      <select class="select" name="unit_id">
+        <option value="">Alle Einheiten</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if filter_unit_id == u.id %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label" style="display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" name="overdue" value="1" {% if filter_overdue %}checked{% endif %}>
+        Review überfällig
+      </label>
+      <button type="submit" class="btn btn-sm">Filtern</button>
+    </form>
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>Enter</kbd> Details</span>
+      <span><kbd>r</kbd> Review</span>
+      {% if can_create %}<span><kbd>c</kbd> Neu</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Informationswert</th>
+          <th>Schutzstufe</th>
+          <th>V / I / Vfb</th>
+          <th>Einheit</th>
+          <th>Verantwortlich</th>
+          <th>Systeme</th>
+          <th>Nächstes Review</th>
+          <th>Aktion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if assets.is_empty() %}
+        <tr><td colspan="8" class="muted">Keine Informationswerte gefunden.</td></tr>
+        {% else %}
+        {% for a in assets %}
+        <tr class="selectable-row"
+            data-title="{{ a.level_code }} · {{ a.name }}"
+            data-drawer-url="/classification/assets/{{ a.id }}">
+          <td><strong>{{ a.name }}</strong></td>
+          <td><span class="badge {{ a.badge_css_class }}">{{ a.level_code }} · {{ a.level_name }}</span></td>
+          <td>
+            <span class="badge {{ a.confidentiality_css }}" title="Vertraulichkeit">{{ a.confidentiality_label }}</span>
+            <span class="badge {{ a.integrity_css }}" title="Integrität">{{ a.integrity_label }}</span>
+            <span class="badge {{ a.availability_css }}" title="Verfügbarkeit">{{ a.availability_label }}</span>
+          </td>
+          <td>{{ a.owner_unit_name }}</td>
+          <td>{{ a.owner_user_name }}</td>
+          <td><span class="code-pill">{{ a.system_count }}</span></td>
+          <td>
+            {% if a.is_overdue %}
+            <span class="badge badge-critical">{{ a.next_review_label }} (überfällig)</span>
+            {% else %}
+            {{ a.next_review_label }}
+            {% endif %}
+          </td>
+          <td>
+            {% if a.can_edit %}
+            <button type="button" class="btn btn-sm" data-shortcut="r"
+                    hx-post="/classification/assets/{{ a.id }}/review"
+                    title="Review als geprüft markieren">
+              Geprüft <kbd>r</kbd>
+            </button>
+            {% else %}
+            <span class="muted">–</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
