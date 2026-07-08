@@ -1,0 +1,82 @@
+<div class="page-header">
+  <div>
+    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+      <span class="code-pill">{{ doc_code }}</span>
+      <span class="badge {{ status_css }}">v{{ version_number }} · {{ status_label }}</span>
+    </div>
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="page-subtitle">Entwurf bearbeiten (freigegebene Versionen bleiben gemäß ISO 7.5.3 unveränderlich)</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn" href="/documents/{{ doc_id }}?version={{ version_id }}">Zur Ansicht</a>
+    {% if can_approve %}
+    <form method="post" action="/documents/{{ doc_id }}/versions/{{ version_id }}/approve" class="inline-form">
+      <button type="submit" class="btn btn-primary">Jetzt freigeben</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<section class="card">
+  <form method="post" action="/documents/{{ doc_id }}/versions/{{ version_id }}" enctype="multipart/form-data" class="stack-md">
+    <div class="md-editor-meta">
+      <div class="form-row">
+        <label class="form-label" for="version_number">Versionsnummer *</label>
+        <input class="input" id="version_number" name="version_number" value="{{ version_number }}" required maxlength="32">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="change_summary">Änderungsnotiz</label>
+        <input class="input" id="change_summary" name="change_summary" value="{{ change_summary }}" placeholder="Kurzbeschreibung der Änderungen">
+      </div>
+    </div>
+
+    {% if source_type_str == "markdown_editor" %}
+    <div class="md-split-pane">
+      <div class="md-pane">
+        <label class="form-label" for="content_markdown">Markdown-Quelltext</label>
+        <div class="stack-sm" style="gap: 0;">
+          <div class="md-toolbar" data-md-toolbar="content_markdown" role="toolbar" aria-label="Markdown-Formatierung">
+            <button type="button" class="md-toolbar-btn" data-md-action="h2" title="Überschrift Ebene 2">H2</button>
+            <button type="button" class="md-toolbar-btn" data-md-action="h3" title="Überschrift Ebene 3">H3</button>
+            <span class="md-toolbar-sep" aria-hidden="true"></span>
+            <button type="button" class="md-toolbar-btn" data-md-action="bold" title="Fett"><strong>Fett</strong></button>
+            <button type="button" class="md-toolbar-btn" data-md-action="italic" title="Kursiv"><em>Kursiv</em></button>
+            <span class="md-toolbar-sep" aria-hidden="true"></span>
+            <button type="button" class="md-toolbar-btn" data-md-action="ul" title="Aufzählung">• Liste</button>
+            <button type="button" class="md-toolbar-btn" data-md-action="ol" title="Nummerierte Liste">1. Liste</button>
+            <button type="button" class="md-toolbar-btn" data-md-action="table" title="2-Spalten-Tabelle einfügen">Tabelle</button>
+            <span class="md-toolbar-sep" aria-hidden="true"></span>
+            <button type="button" class="md-toolbar-btn" data-md-action="anchor" title="Deep-Link-Anker für SoA einfügen">Anker (#id)</button>
+          </div>
+          <textarea class="textarea textarea-code md-editor-textarea" id="content_markdown" name="content_markdown"
+                    hx-post="/documents/preview"
+                    hx-trigger="input changed delay:250ms"
+                    hx-target="#md-live-preview">{{ content_markdown }}</textarea>
+        </div>
+        <span class="form-hint">Deep-Link-Anker für SoA-Verweise: <code>&lt;a id=&quot;slug&quot;&gt;&lt;/a&gt;</code> direkt über der jeweiligen Überschrift.</span>
+      </div>
+      <div class="md-pane">
+        <span class="form-label">Live-Vorschau (bereinigt)</span>
+        <div id="md-live-preview" class="markdown-body md-preview-pane">
+          {{ preview_html|safe }}
+        </div>
+      </div>
+    </div>
+    {% else if source_type_str == "external_link" %}
+    <div class="form-row">
+      <label class="form-label" for="external_url">Externe URL (https://) *</label>
+      <input class="input" id="external_url" name="external_url" type="url" value="{{ external_url }}" required>
+    </div>
+    {% else %}
+    <div class="form-row">
+      <label class="form-label" for="file">Neue Datei hochladen (aktuell: {{ original_filename }})</label>
+      <input class="input" id="file" name="file" type="file">
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Entwurf speichern</button>
+      <a class="btn" href="/documents/{{ doc_id }}?version={{ version_id }}">Abbrechen</a>
+    </div>
+  </form>
+</section>

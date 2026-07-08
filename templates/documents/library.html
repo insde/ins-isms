@@ -1,0 +1,110 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Dokumente &amp; Richtlinien</h1>
+    <p class="page-subtitle">Gelenkte Dokumente, Policies, Runbooks &amp; Lesebestätigungen (ISO 7.5 / A.5.1 / A.6.3)</p>
+  </div>
+  {% if can_create %}
+  <div class="toolbar-group">
+    <a class="btn btn-primary" data-shortcut="c" href="/documents/new">
+      Neues Dokument <kbd>c</kbd>
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<section class="table-card">
+  <div class="toolbar">
+    <form method="get" action="/documents" class="toolbar-group">
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code oder Titel…">
+      <select class="select" name="doc_type">
+        <option value="">Alle Dokumenttypen</option>
+        <option value="policy" {% if filter_doc_type == "policy" %}selected{% endif %}>Richtlinie (Policy)</option>
+        <option value="guideline" {% if filter_doc_type == "guideline" %}selected{% endif %}>Leitlinie</option>
+        <option value="sop" {% if filter_doc_type == "sop" %}selected{% endif %}>Verfahrensanweisung (SOP)</option>
+        <option value="record" {% if filter_doc_type == "record" %}selected{% endif %}>Nachweis / Protokoll</option>
+        <option value="template" {% if filter_doc_type == "template" %}selected{% endif %}>Vorlage</option>
+        <option value="runbook" {% if filter_doc_type == "runbook" %}selected{% endif %}>Runbook</option>
+      </select>
+      <select class="select" name="source_type">
+        <option value="">Alle Quellen</option>
+        <option value="markdown_editor" {% if filter_source_type == "markdown_editor" %}selected{% endif %}>Markdown-Editor</option>
+        <option value="uploaded_file" {% if filter_source_type == "uploaded_file" %}selected{% endif %}>Hochgeladene Datei</option>
+        <option value="external_link" {% if filter_source_type == "external_link" %}selected{% endif %}>Externer Link</option>
+      </select>
+      {% if !is_restricted_viewer %}
+      <select class="select" name="status">
+        <option value="">Alle Status</option>
+        <option value="draft" {% if filter_status == "draft" %}selected{% endif %}>Entwurf</option>
+        <option value="in_review" {% if filter_status == "in_review" %}selected{% endif %}>In Prüfung</option>
+        <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>Freigegeben</option>
+        <option value="review_due" {% if filter_status == "review_due" %}selected{% endif %}>Review fällig</option>
+      </select>
+      {% endif %}
+      <label class="checkbox-label">
+        <input type="checkbox" name="pending_ack" value="1" {% if filter_pending_ack %}checked{% endif %}>
+        Offene Lesebestätigung
+      </label>
+      <button type="submit" class="btn btn-sm">Filtern</button>
+    </form>
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>Enter</kbd> Details</span>
+      {% if can_create %}<span><kbd>c</kbd> Neu</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Titel</th>
+          <th>Typ</th>
+          <th>Quelle</th>
+          <th>Schutzstufe</th>
+          <th>Version</th>
+          <th>Status</th>
+          <th>Nächstes Review</th>
+          <th>Lesebestätigung</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if documents.is_empty() %}
+        <tr><td colspan="9" class="muted">Keine Dokumente gefunden.</td></tr>
+        {% else %}
+        {% for d in documents %}
+        <tr class="selectable-row"
+            data-title="{{ d.doc_code }} · {{ d.title }}"
+            data-drawer-url="/documents/{{ d.id }}/drawer">
+          <td><span class="code-pill">{{ d.doc_code }}</span></td>
+          <td><a href="/documents/{{ d.id }}"><strong>{{ d.title }}</strong></a></td>
+          <td>{{ d.doc_type_label }}</td>
+          <td>{{ d.source_type_label }}</td>
+          <td><span class="badge {{ d.badge_css_class }}">{{ d.level_code }}</span></td>
+          <td>v{{ d.active_version_number }}</td>
+          <td><span class="badge {{ d.active_status_css }}">{{ d.active_status_label }}</span></td>
+          <td>
+            {% if d.is_review_due %}
+            <span class="badge badge-danger">{{ d.next_review_label }}</span>
+            {% else %}
+            {{ d.next_review_label }}
+            {% endif %}
+          </td>
+          <td>
+            {% if d.requires_acknowledgment %}
+              {% if d.user_acknowledged %}
+              <span class="badge badge-approved">Bestätigt ({{ d.ack_summary }})</span>
+              {% else %}
+              <span class="badge badge-warning">Offen ({{ d.ack_summary }})</span>
+              {% endif %}
+            {% else %}
+            <span class="muted">–</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

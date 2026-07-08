@@ -1,0 +1,47 @@
+<dl class="drawer-meta">
+  <dt>Dokument-Code</dt>
+  <dd><span class="code-pill">{{ doc.doc_code }}</span></dd>
+  <dt>Titel</dt>
+  <dd><strong>{{ doc.title }}</strong></dd>
+  <dt>Typ</dt>
+  <dd>{{ doc.doc_type_label }}</dd>
+  <dt>Quelle</dt>
+  <dd>{{ doc.source_type_label }}</dd>
+  <dt>Schutzstufe</dt>
+  <dd><span class="badge {{ doc.badge_css_class }}">{{ doc.level_code }}</span></dd>
+  <dt>Aktive Version</dt>
+  <dd>v{{ doc.active_version_number }} <span class="badge {{ doc.active_status_css }}">{{ doc.active_status_label }}</span></dd>
+  <dt>Einheit</dt>
+  <dd>{{ doc.owner_unit_name }}</dd>
+  <dt>Verantwortlich</dt>
+  <dd>{{ doc.owner_user_name }}</dd>
+  <dt>Nächstes Review</dt>
+  <dd>{{ doc.next_review_label }}</dd>
+  <dt>Lesebestätigung</dt>
+  <dd>{{ doc.ack_summary }}</dd>
+</dl>
+
+{% if doc.source_type_str == "uploaded_file" && !full_sha256.is_empty() %}
+<div class="drawer-section">
+  <h4>Dateianhang (SHA-256)</h4>
+  <p style="margin:0 0 0.35rem 0; font-size:13px;">{{ doc.original_filename }}</p>
+  <code style="font-size:11px; word-break:break-all;">{{ full_sha256 }}</code>
+</div>
+{% endif %}
+
+{% if doc.source_type_str == "external_link" && !doc.external_url.is_empty() %}
+<div class="drawer-section">
+  <h4>Externes Ziel</h4>
+  <p style="margin:0; font-size:13px;"><a href="{{ doc.external_url }}" target="_blank" rel="noopener noreferrer">{{ doc.external_url }}</a></p>
+</div>
+{% endif %}
+
+<div class="drawer-section form-actions">
+  <a class="btn btn-primary" href="/documents/{{ doc.id }}?version={{ doc.active_version_id }}">Dokument öffnen</a>
+  <a class="btn" href="/documents/{{ doc.id }}/versions/{{ doc.active_version_id }}/export.pdf">ISO-7.5-PDF</a>
+  {% if can_edit %}
+  <form method="post" action="/documents/{{ doc.id }}/versions" class="inline-form">
+    <button type="submit" class="btn">Neue Entwurfsversion</button>
+  </form>
+  {% endif %}
+</div>

@@ -1,0 +1,142 @@
+<div class="page-header">
+  <div>
+    <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.25rem;">
+      <span class="code-pill">{{ doc_code }}</span>
+      <span class="badge {{ badge_css_class }}">{{ level_code }}</span>
+      <span class="badge {{ selected_status_css }}">v{{ selected_version_number }} · {{ selected_status_label }}</span>
+    </div>
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="page-subtitle">{{ doc_type_label }} · {{ source_type_label }} · Einheit: {{ owner_unit_name }} · Verantwortlich: {{ owner_user_name }}</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn" href="/documents">Alle Dokumente</a>
+    <a class="btn" href="/documents/{{ doc_id }}/versions/{{ selected_version_id }}/export.pdf">ISO-7.5-PDF</a>
+    {% if can_edit && (selected_status_str == "draft" || selected_status_str == "in_review") %}
+    <a class="btn btn-primary" href="/documents/{{ doc_id }}/versions/{{ selected_version_id }}/edit">Bearbeiten</a>
+    {% endif %}
+    {% if can_edit && selected_status_str == "draft" %}
+    <form method="post" action="/documents/{{ doc_id }}/versions/{{ selected_version_id }}/submit-review" class="inline-form">
+      <button type="submit" class="btn">Zur Prüfung einreichen</button>
+    </form>
+    {% endif %}
+    {% if can_approve && (selected_status_str == "draft" || selected_status_str == "in_review") %}
+    <form method="post" action="/documents/{{ doc_id }}/versions/{{ selected_version_id }}/approve" class="inline-form">
+      <button type="submit" class="btn btn-primary">Freigeben</button>
+    </form>
+    {% endif %}
+    {% if can_edit %}
+    <form method="post" action="/documents/{{ doc_id }}/versions" class="inline-form">
+      <button type="submit" class="btn">Neue Entwurfsversion ableiten</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if can_acknowledge %}
+<section class="card" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+  <div>
+    <strong>Verbindliche Kenntnisnahme (ISO A.6.3)</strong>
+    <p class="muted" style="margin:0.2rem 0 0 0; font-size:13px;">
+      Aktuelle Bestätigungsquote für v{{ selected_version_number }}: {{ ack_count }} von {{ active_user_count }} aktiven Mitarbeitenden.
+    </p>
+  </div>
+  {% if user_acknowledged %}
+  <span class="badge badge-approved">Gelesen und verstanden bestätigt</span>
+  {% else %}
+  <form method="post" action="/documents/{{ doc_id }}/acknowledge" class="inline-form">
+    <button type="submit" class="btn btn-primary">Gelesen und verstanden bestätigen</button>
+  </form>
+  {% endif %}
+</section>
+{% endif %}
+
+<div style="display:grid; grid-template-columns: minmax(0, 1fr) 280px; gap:1.25rem; align-items:start;">
+  <section class="card">
+    {% if source_type_str == "markdown_editor" %}
+      {% if !toc.is_empty() %}
+      <nav aria-label="Inhaltsverzeichnis" style="margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border);">
+        <strong style="font-size:13px; display:block; margin-bottom:0.4rem;">Inhaltsverzeichnis (Deep-Links)</strong>
+        <ul style="margin:0; padding-left:1.2rem; font-size:13px;">
+          {% for item in toc %}
+          <li><a href="#{{ item.anchor }}">{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+      <article class="markdown-body">
+        {{ rendered_html|safe }}
+      </article>
+    {% else if source_type_str == "uploaded_file" %}
+      <h3>Hochgeladene Datei</h3>
+      <dl class="drawer-meta">
+        <dt>Dateiname</dt>
+        <dd><strong>{{ original_filename }}</strong></dd>
+        <dt>SHA-256-Prüfsumme</dt>
+        <dd><code style="word-break:break-all;">{{ file_sha256 }}</code></dd>
+      </dl>
+      <div class="form-actions" style="margin-top:1rem;">
+        <a class="btn btn-primary" href="/documents/{{ doc_id }}/versions/{{ selected_version_id }}/download">Datei herunterladen</a>
+      </div>
+    {% else %}
+      <h3>Externes Dokument / Runbook</h3>
+      <p>Dieses Dokument wird in einem externen System gepflegt:</p>
+      <p><a class="btn btn-primary" href="{{ external_url }}" target="_blank" rel="noopener noreferrer">Externes Ziel öffnen</a></p>
+      <p class="muted" style="font-size:12px; word-break:break-all;">{{ external_url }}</p>
+    {% endif %}
+  </section>
+
+  <aside class="card">
+    <h3 style="margin-top:0;">Dokumentenlenkung</h3>
+    <dl class="drawer-meta">
+      <dt>Prüfintervall</dt>
+      <dd>{{ review_interval_months }} Monate</dd>
+      <dt>Nächstes Review</dt>
+      <dd>{{ next_review_label }}</dd>
+      <dt>Freigegeben durch</dt>
+      <dd>{{ selected_approved_by }}</dd>
+      <dt>Freigabedatum</dt>
+      <dd>{{ selected_approved_at }}</dd>
+      <dt>Änderungsnotiz</dt>
+      <dd>{{ selected_change_summary }}</dd>
+    </dl>
+  </aside>
+</div>
+
+<section class="table-card" style="margin-top:1.25rem;">
+  <div class="toolbar">
+    <h3 style="margin:0;">Versionshistorie</h3>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Status</th>
+          <th>Änderungsnotiz</th>
+          <th>Autor</th>
+          <th>Freigabe</th>
+          <th>Erstellt</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in versions %}
+        <tr {% if v.is_selected %}class="is-selected"{% endif %}>
+          <td><strong>v{{ v.version_number }}</strong></td>
+          <td><span class="badge {{ v.status_css }}">{{ v.status_label }}</span></td>
+          <td>{{ v.change_summary }}</td>
+          <td>{{ v.author_name }}</td>
+          <td>{{ v.approved_by_name }} ({{ v.approved_at_label }})</td>
+          <td>{{ v.created_at_label }}</td>
+          <td>
+            <a class="btn btn-sm" href="/documents/{{ doc_id }}?version={{ v.id }}">Anzeigen</a>
+            {% if v.can_edit_version %}
+            <a class="btn btn-sm" href="/documents/{{ doc_id }}/versions/{{ v.id }}/edit">Bearbeiten</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

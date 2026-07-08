@@ -1,0 +1,93 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Neues Dokument anlegen</h1>
+    <p class="page-subtitle">Gelenktes Dokument (Entwurf v0.1) als Markdown-Richtlinie, Datei-Upload oder externer Runbook-Link</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn" href="/documents">Zurück zur Bibliothek</a>
+  </div>
+</div>
+
+<section class="card">
+  <form method="post" action="/documents" enctype="multipart/form-data" class="form-grid">
+    <div class="form-row">
+      <label class="form-label" for="doc_code">Dokument-Code *</label>
+      <input class="input" id="doc_code" name="doc_code" required maxlength="32" placeholder="z. B. POL-005 oder SOP-010">
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="title">Titel *</label>
+      <input class="input" id="title" name="title" required maxlength="255" placeholder="z. B. Datensicherungs- und Wiederherstellungsrichtlinie">
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="doc_type">Dokumenttyp *</label>
+      <select class="select" id="doc_type" name="doc_type" required>
+        <option value="policy">Richtlinie (Policy)</option>
+        <option value="guideline">Leitlinie</option>
+        <option value="sop">Verfahrensanweisung (SOP)</option>
+        <option value="record">Nachweis / Protokoll</option>
+        <option value="template">Vorlage</option>
+        <option value="runbook">Runbook</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="source_type">Quelltyp *</label>
+      <select class="select" id="source_type" name="source_type" required>
+        <option value="markdown_editor">Markdown-Editor</option>
+        <option value="uploaded_file">Hochgeladene Datei</option>
+        <option value="external_link">Externer Link (https://)</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="classification_level_id">Schutzstufe *</label>
+      <select class="select" id="classification_level_id" name="classification_level_id" required>
+        {% for lvl in levels %}
+        <option value="{{ lvl.id }}">{{ lvl.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="review_interval_months">Prüfintervall (Monate) *</label>
+      <input class="input" id="review_interval_months" name="review_interval_months" type="number" min="1" max="60" value="12" required>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="owner_unit_id">Verantwortliche Einheit</label>
+      <select class="select" id="owner_unit_id" name="owner_unit_id">
+        <option value="">– Keine –</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if u.id == default_owner_unit_id %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="owner_user_id">Verantwortliche Person</label>
+      <select class="select" id="owner_user_id" name="owner_user_id">
+        <option value="">– Keine –</option>
+        {% for u in users %}
+        <option value="{{ u.id }}" {% if u.id == default_owner_user_id %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row form-row-full">
+      <label class="checkbox-label">
+        <input type="checkbox" name="requires_acknowledgment" value="1">
+        Pflicht zur Mitarbeiter-Lesebestätigung nach Freigabe (ISO A.6.3)
+      </label>
+    </div>
+    <div class="form-row form-row-full">
+      <label class="form-label" for="content_markdown">Markdown-Inhalt (bei Quelltyp Markdown-Editor)</label>
+      <textarea class="textarea textarea-lg textarea-code" id="content_markdown" name="content_markdown" placeholder="# Titel&#10;&#10;&lt;a id=&quot;zielsetzung&quot;&gt;&lt;/a&gt;&#10;## 1. Zielsetzung"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="external_url">Externe URL (bei Quelltyp Externer Link)</label>
+      <input class="input" id="external_url" name="external_url" type="url" placeholder="https://wiki.example.com/runbook">
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="file">Datei-Upload (bei Quelltyp Hochgeladene Datei)</label>
+      <input class="input" id="file" name="file" type="file">
+    </div>
+    <div class="form-actions form-row-full">
+      <button type="submit" class="btn btn-primary">Als Entwurf 0.1 anlegen</button>
+      <a class="btn" href="/documents">Abbrechen</a>
+    </div>
+  </form>
+</section>
