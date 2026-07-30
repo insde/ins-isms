@@ -1,0 +1,70 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ control_code }}</span>
+    <strong>{{ title }}</strong>
+  </div>
+  <h4>Prüfungsnachweis hinzufügen</h4>
+
+  <form method="post" action="/soa/{{ soa_id }}/evidences"
+        enctype="multipart/form-data"
+        hx-post="/soa/{{ soa_id }}/evidences"
+        hx-encoding="multipart/form-data"
+        class="form-grid">
+    <div class="form-field">
+      <label class="label" for="ev-title">Titel des Nachweises</label>
+      <input id="ev-title" name="title" type="text" class="input" required
+             placeholder="z. B. BitLocker-Richtlinie oder Backup-Protokoll Q4">
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-type">Nachweistyp</label>
+      <select id="ev-type" name="evidence_type" class="select">
+        <option value="policy_link">Richtlinien-Verweis (Deep-Link)</option>
+        <option value="file">Datei-Nachweis (Upload mit SHA-256)</option>
+        <option value="external_url">Externe URL (z. B. Ticket / Wiki)</option>
+        <option value="note">Prüfnotiz (Freitext)</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-doc">Verknüpftes Dokument (bei Richtlinien-Verweis)</label>
+      <select id="ev-doc" name="linked_document_id" class="select">
+        <option value="">– Dokument wählen –</option>
+        {% for d in doc_options %}
+        <option value="{{ d.id }}">{{ d.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-anchor">Abschnitts-Anker (optional, z. B. clean-desk)</label>
+      <input id="ev-anchor" name="section_anchor" type="text" class="input" placeholder="clean-desk">
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-anchor-label">Abschnitts-Bezeichnung (optional)</label>
+      <input id="ev-anchor-label" name="section_label" type="text" class="input" placeholder="Kap. 3: Clean-Desk">
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-file">Datei (bei Datei-Nachweis)</label>
+      <input id="ev-file" name="file" type="file" class="input">
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-url">Externe URL (bei Externer URL)</label>
+      <input id="ev-url" name="evidence_url" type="url" class="input" placeholder="https://…">
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="ev-note">Prüfnotiz (bei Prüfnotiz)</label>
+      <textarea id="ev-note" name="evidence_note" class="textarea textarea-lg" placeholder="Stichprobe vom … ohne Befund."></textarea>
+    </div>
+
+    <div class="toolbar-group">
+      <button type="submit" class="btn btn-primary btn-sm">Nachweis speichern</button>
+      <button type="button" class="btn btn-sm"
+              hx-get="/soa/{{ soa_id }}/drawer" hx-target="#drawer-body">Zurück</button>
+    </div>
+  </form>
+</div>

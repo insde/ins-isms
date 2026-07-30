@@ -1,0 +1,176 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Statement of Applicability (SoA)</h1>
+    <p class="page-subtitle">{{ selected_framework_name }} · Anwendbarkeit, Umsetzungsgrad &amp; Prüfungsnachweise</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/soa/export.csv?framework={{ selected_framework_code }}&amp;delimiter=semicolon">CSV (Excel)</a>
+    <a class="btn btn-primary btn-sm" href="/soa/export.pdf?framework={{ selected_framework_code }}">SoA-PDF exportieren</a>
+  </div>
+</div>
+
+<div class="toolbar" style="margin-bottom: 1rem;">
+  <div class="toolbar-group">
+    {% for fw in frameworks %}
+    <a class="btn btn-sm {% if fw.is_selected %}btn-primary{% endif %}"
+       href="/soa?framework={{ fw.code }}&amp;filter={{ active_filter }}&amp;q={{ filter_q }}">
+      {{ fw.name }} <span class="muted">({{ fw.version }})</span>
+    </a>
+    {% endfor %}
+  </div>
+  <div class="kbd-hint-bar">
+    <span><kbd>j</kbd>/<kbd>k</kbd> Wählen</span>
+    <span><kbd>Enter</kbd> Details</span>
+    {% if !is_auditor %}
+    <span><kbd>s</kbd> Status</span>
+    <span><kbd>a</kbd> Anwendbarkeit</span>
+    <span><kbd>e</kbd> Nachweis</span>
+    {% endif %}
+  </div>
+</div>
+
+<section class="kpi-grid" style="margin-bottom: 1.25rem;">
+  <div class="kpi-card">
+    <div class="kpi-label">Controls gesamt</div>
+    <div class="kpi-value">{{ kpis.total }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Anwendbar / N/A</div>
+    <div class="kpi-value">{{ kpis.applicable }} / {{ kpis.not_applicable }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Umgesetzt (Verifiziert)</div>
+    <div class="kpi-value">{{ kpis.implemented_or_verified }} ({{ kpis.verified }})</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Lücken / Ohne Nachweis</div>
+    <div class="kpi-value">{{ kpis.gaps }} / {{ kpis.no_evidence }}</div>
+  </div>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <a class="btn btn-sm {% if active_filter == "all" %}btn-primary{% endif %}"
+         href="/soa?framework={{ selected_framework_code }}&amp;filter=all&amp;q={{ filter_q }}"
+         hx-get="/soa?framework={{ selected_framework_code }}&amp;filter=all&amp;q={{ filter_q }}"
+         hx-target="#main-content" hx-push-url="true">Alle ({{ kpis.total }})</a>
+      <a class="btn btn-sm {% if active_filter == "applicable" %}btn-primary{% endif %}"
+         href="/soa?framework={{ selected_framework_code }}&amp;filter=applicable&amp;q={{ filter_q }}"
+         hx-get="/soa?framework={{ selected_framework_code }}&amp;filter=applicable&amp;q={{ filter_q }}"
+         hx-target="#main-content" hx-push-url="true">Anwendbar ({{ kpis.applicable }})</a>
+      <a class="btn btn-sm {% if active_filter == "not_applicable" %}btn-primary{% endif %}"
+         href="/soa?framework={{ selected_framework_code }}&amp;filter=not_applicable&amp;q={{ filter_q }}"
+         hx-get="/soa?framework={{ selected_framework_code }}&amp;filter=not_applicable&amp;q={{ filter_q }}"
+         hx-target="#main-content" hx-push-url="true">Ausgeschlossen ({{ kpis.not_applicable }})</a>
+      <a class="btn btn-sm {% if active_filter == "gaps" %}btn-primary{% endif %}"
+         href="/soa?framework={{ selected_framework_code }}&amp;filter=gaps&amp;q={{ filter_q }}"
+         hx-get="/soa?framework={{ selected_framework_code }}&amp;filter=gaps&amp;q={{ filter_q }}"
+         hx-target="#main-content" hx-push-url="true">Lücken / Offen ({{ kpis.gaps }})</a>
+      <a class="btn btn-sm {% if active_filter == "no_evidence" %}btn-primary{% endif %}"
+         href="/soa?framework={{ selected_framework_code }}&amp;filter=no_evidence&amp;q={{ filter_q }}"
+         hx-get="/soa?framework={{ selected_framework_code }}&amp;filter=no_evidence&amp;q={{ filter_q }}"
+         hx-target="#main-content" hx-push-url="true">Ohne Nachweis ({{ kpis.no_evidence }})</a>
+      <a class="btn btn-sm {% if active_filter == "overdue" %}btn-primary{% endif %}"
+         href="/soa?framework={{ selected_framework_code }}&amp;filter=overdue&amp;q={{ filter_q }}"
+         hx-get="/soa?framework={{ selected_framework_code }}&amp;filter=overdue&amp;q={{ filter_q }}"
+         hx-target="#main-content" hx-push-url="true">Überfällig ({{ kpis.overdue }})</a>
+    </div>
+
+    <form method="get" action="/soa" class="toolbar-group">
+      <input type="hidden" name="framework" value="{{ selected_framework_code }}">
+      <input type="hidden" name="filter" value="{{ active_filter }}">
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code, Titel oder Owner…">
+      <button type="submit" class="btn btn-sm">Suchen</button>
+    </form>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Control</th>
+          <th>Anwendbar</th>
+          <th>Status</th>
+          <th>Verantwortlich</th>
+          <th>Zieldatum</th>
+          <th>Nachweise</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if groups.is_empty() %}
+        <tr><td colspan="8" class="muted">Keine Controls für diese Filterauswahl gefunden.</td></tr>
+        {% else %}
+        {% for grp in groups %}
+        <tr class="domain-group-row">
+          <td colspan="8"><strong>{{ grp.domain_label }}</strong> <span class="muted">({{ grp.rows.len() }})</span></td>
+        </tr>
+        {% for row in grp.rows %}
+        <tr class="selectable-row"
+            data-title="{{ row.control_code }} · {{ row.title }}"
+            data-drawer-url="/soa/{{ row.soa_id }}/drawer">
+          <td><span class="code-pill">{{ row.control_code }}</span></td>
+          <td>
+            <strong>{{ row.title }}</strong>
+            {% if row.mapping_count > 0 %}
+            <span class="badge badge-neutral" title="Verknüpft mit anderem Framework">{{ row.mapping_count }} Mapping(s)</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.is_applicable %}
+            <span class="badge badge-approved">Ja</span>
+            {% else %}
+            <span class="badge badge-draft">N/A</span>
+            {% endif %}
+          </td>
+          <td><span class="badge {{ row.status_css }}">{{ row.status_label }}</span></td>
+          <td>{{ row.owner_label }}</td>
+          <td>
+            {% if row.is_overdue %}
+            <span class="badge badge-danger">{{ row.target_date_label }}</span>
+            {% else %}
+            {{ row.target_date_label }}
+            {% endif %}
+          </td>
+          <td>
+            {% if row.evidence_count > 0 %}
+            <span class="badge badge-info">{{ row.evidence_count }} Nachweis(e)</span>
+            {% else %}
+            <span class="muted">Keine</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.can_edit %}
+            <div class="toolbar-group">
+              <button type="button" class="btn btn-sm" data-shortcut="s"
+                      title="Status weiterschalten (s)"
+                      hx-post="/soa/{{ row.soa_id }}/cycle-status">Status <kbd>s</kbd></button>
+              {% if row.is_applicable %}
+              <button type="button" class="btn btn-sm" data-shortcut="a"
+                      title="Auf Nicht anwendbar setzen (a)"
+                      hx-get="/soa/{{ row.soa_id }}/applicability-modal"
+                      hx-target="#drawer-body">N/A <kbd>a</kbd></button>
+              {% else %}
+              <button type="button" class="btn btn-sm" data-shortcut="a"
+                      title="Als anwendbar markieren (a)"
+                      hx-post="/soa/{{ row.soa_id }}/toggle-applicability">Aktiv <kbd>a</kbd></button>
+              {% endif %}
+              <button type="button" class="btn btn-sm" data-shortcut="e"
+                      title="Nachweis hinzufügen (e)"
+                      hx-get="/soa/{{ row.soa_id }}/evidences/new"
+                      hx-target="#drawer-body">+ Nachweis <kbd>e</kbd></button>
+            </div>
+            {% else %}
+            <span class="muted">Nur Lesen</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

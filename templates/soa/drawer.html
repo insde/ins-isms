@@ -1,0 +1,190 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ control_code }}</span>
+    <span class="badge badge-neutral">{{ framework_code }}</span>
+    <span class="badge {{ status_css }}">{{ status_label }}</span>
+  </div>
+  <h3 style="margin: 0.25rem 0;">{{ title }}</h3>
+  <p class="muted" style="margin: 0 0 0.5rem;">{{ domain_label }}</p>
+  <p>{{ description }}</p>
+  {% if !audit_question.is_empty() %}
+  <p class="muted"><strong>Audit-Leitfrage:</strong> {{ audit_question }}</p>
+  {% endif %}
+</div>
+
+<div class="drawer-section">
+  <h4>Bewertung &amp; Umsetzung</h4>
+  {% if can_edit %}
+  <form method="post" action="/soa/{{ soa_id }}" hx-post="/soa/{{ soa_id }}" class="form-grid">
+    <input type="hidden" name="redirect_framework" value="{{ framework_code }}">
+    <label class="checkbox-label">
+      <input type="checkbox" name="is_applicable" value="true" {% if is_applicable %}checked{% endif %}>
+      Control ist für unsere Organisation anwendbar
+    </label>
+
+    <div class="form-field">
+      <label class="label" for="soa-justification">Begründung (Pflicht bei Ausschluss / N/A)</label>
+      <textarea id="soa-justification" name="justification" class="textarea"
+                placeholder="{% if !default_na_reason.is_empty() %}{{ default_na_reason }}{% else %}Begründung für Ein- oder Ausschluss…{% endif %}">{{ justification }}</textarea>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="soa-status">Umsetzungsstatus</label>
+      <select id="soa-status" name="implementation_status" class="select">
+        <option value="not_started" {% if status_str == "not_started" %}selected{% endif %}>Nicht begonnen</option>
+        <option value="in_progress" {% if status_str == "in_progress" %}selected{% endif %}>In Umsetzung</option>
+        <option value="implemented" {% if status_str == "implemented" %}selected{% endif %}>Umgesetzt</option>
+        {% if can_verify || status_str == "verified" %}
+        <option value="verified" {% if status_str == "verified" %}selected{% endif %}>Verifiziert</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="soa-notes">Umsetzungshinweise</label>
+      <textarea id="soa-notes" name="implementation_notes" class="textarea">{{ implementation_notes }}</textarea>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="soa-unit">Verantwortliche Einheit</label>
+      <select id="soa-unit" name="owner_unit_id" class="select">
+        <option value="">– Keine Einheit –</option>
+        {% for u in unit_options %}
+        <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="soa-user">Verantwortliche Person</label>
+      <select id="soa-user" name="owner_user_id" class="select">
+        <option value="">– Nicht zugewiesen –</option>
+        {% for p in user_options %}
+        <option value="{{ p.id }}" {% if p.selected %}selected{% endif %}>{{ p.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="soa-target">Zieldatum</label>
+      <input id="soa-target" type="date" name="target_date" class="input" value="{{ target_date_value }}">
+    </div>
+
+    <div class="toolbar-group">
+      <button type="submit" class="btn btn-primary btn-sm">Bewertung speichern</button>
+      <button type="button" class="btn btn-sm"
+              hx-get="/actions/new?linked_soa_entry_id={{ soa_id }}"
+              hx-target="#drawer-body">+ Maßnahme</button>
+    </div>
+  </form>
+  {% else %}
+  <dl class="detail-list">
+    <dt>Anwendbar</dt>
+    <dd>{% if is_applicable %}Ja{% else %}Nein (Ausgeschlossen){% endif %}</dd>
+    <dt>Begründung</dt>
+    <dd>{% if justification.is_empty() %}–{% else %}{{ justification }}{% endif %}</dd>
+    <dt>Verantwortlich</dt>
+    <dd>{{ owner_label }}</dd>
+    <dt>Zieldatum</dt>
+    <dd>{% if target_date_value.is_empty() %}–{% else %}{{ target_date_value }}{% endif %}</dd>
+    <dt>Hinweise</dt>
+    <dd>{% if implementation_notes.is_empty() %}–{% else %}{{ implementation_notes }}{% endif %}</dd>
+  </dl>
+  {% endif %}
+</div>
+
+<div class="drawer-section">
+  <div class="toolbar" style="padding: 0 0 0.5rem;">
+    <h4 style="margin: 0;">Prüfungsnachweise ({{ evidences.len() }})</h4>
+    {% if can_edit %}
+    <button type="button" class="btn btn-sm"
+            hx-get="/soa/{{ soa_id }}/evidences/new"
+            hx-target="#drawer-body">+ Nachweis</button>
+    {% endif %}
+  </div>
+  {% if evidences.is_empty() %}
+  <p class="muted">Noch keine Nachweise verknüpft.</p>
+  {% else %}
+  <ul class="stack-list">
+    {% for ev in evidences %}
+    <li class="stack-item">
+      <div class="toolbar-group" style="justify-content: space-between; width: 100%;">
+        <strong>{{ ev.title }}</strong>
+        <span class="badge badge-neutral">{{ ev.evidence_type_label }}</span>
+      </div>
+
+      {% if ev.evidence_type_str == "file" %}
+      <div class="muted" style="font-size: 0.85rem;">
+        Datei: {{ ev.original_filename }} · SHA-256: <code>{{ ev.file_sha256_short }}…</code>
+        <a href="/soa/{{ soa_id }}/evidences/{{ ev.id }}/download">Herunterladen</a>
+      </div>
+      {% else if ev.evidence_type_str == "policy_link" %}
+      <div style="font-size: 0.85rem;">
+        {% match ev.linked_document_id %}
+          {% when Some with (doc_id) %}
+          <a href="/documents/{{ doc_id }}{% if !ev.section_anchor.is_empty() %}#{{ ev.section_anchor }}{% endif %}">
+            {{ ev.document_label }}{% if !ev.section_label.is_empty() %} → {{ ev.section_label }}{% endif %}
+          </a>
+          {% when None %}
+          <span class="muted">Verknüpftes Dokument entfernt</span>
+        {% endmatch %}
+        {% if is_auditor %}
+          {% if ev.document_has_approved %}
+          <span class="badge badge-approved">Freigegeben</span>
+          {% else %}
+          <span class="badge badge-warning">Keine Freigabe</span>
+          {% endif %}
+        {% endif %}
+        {% if ev.show_unapproved_warning %}
+        <div class="badge badge-warning" style="margin-top: 0.25rem;">Verknüpfte Richtlinie noch nicht freigegeben</div>
+        {% endif %}
+      </div>
+      {% else if ev.evidence_type_str == "external_url" %}
+      <div style="font-size: 0.85rem;">
+        <a href="{{ ev.evidence_url }}" target="_blank" rel="noopener noreferrer">{{ ev.evidence_url }}</a>
+      </div>
+      {% else if ev.evidence_type_str == "note" %}
+      <p style="margin: 0.25rem 0; font-size: 0.85rem;">{{ ev.evidence_note }}</p>
+      {% endif %}
+
+      <div class="toolbar-group" style="margin-top: 0.35rem;">
+        {% if ev.is_verified %}
+        <span class="badge badge-approved">{{ ev.verified_info }}</span>
+        {% else if can_verify %}
+        <button type="button" class="btn btn-sm"
+                hx-post="/soa/{{ soa_id }}/evidences/{{ ev.id }}/verify">Verifizieren</button>
+        {% endif %}
+        {% if can_edit %}
+        <button type="button" class="btn btn-sm"
+                hx-post="/soa/{{ soa_id }}/evidences/{{ ev.id }}/delete">Entfernen</button>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+{% if !mappings.is_empty() %}
+<div class="drawer-section">
+  <h4>Cross-Framework-Abdeckung ({{ mappings.len() }})</h4>
+  <ul class="stack-list">
+    {% for m in mappings %}
+    <li class="stack-item">
+      <div class="toolbar-group" style="justify-content: space-between; width: 100%;">
+        <span>
+          <span class="code-pill">{{ m.control_code }}</span>
+          <strong>{{ m.title }}</strong>
+          <span class="muted">({{ m.framework_code }} · {{ m.mapping_type_label }})</span>
+        </span>
+        {% if m.is_applicable %}
+        <span class="badge {{ m.status_css }}">{{ m.status_label }}</span>
+        {% else %}
+        <span class="badge badge-draft">N/A</span>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

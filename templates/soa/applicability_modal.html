@@ -1,0 +1,23 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ control_code }}</span>
+    <strong>{{ title }}</strong>
+  </div>
+  <h4>Ausschluss begründen (Nicht anwendbar)</h4>
+  <p class="muted">Gemäß ISO/IEC 27001 Kap. 6.1.3 d) erfordert jeder Ausschluss eines Controls eine nachvollziehbare Begründung.</p>
+
+  <form method="post" action="/soa/{{ soa_id }}/toggle-applicability"
+        hx-post="/soa/{{ soa_id }}/toggle-applicability" class="form-grid">
+    <input type="hidden" name="is_applicable" value="false">
+    <div class="form-field">
+      <label class="label" for="na-justification">Begründung (Pflichtfeld)</label>
+      <textarea id="na-justification" name="justification" class="textarea" required
+                placeholder="{% if !default_na_reason.is_empty() %}{{ default_na_reason }}{% else %}z. B. Kein eigener Serverraum vorhanden; Betrieb erfolgt vollständig in zertifiziertem Rechenzentrum.{% endif %}">{{ current_justification }}</textarea>
+    </div>
+    <div class="toolbar-group">
+      <button type="submit" class="btn btn-primary btn-sm">Als N/A ausschließen</button>
+      <button type="button" class="btn btn-sm"
+              hx-get="/soa/{{ soa_id }}/drawer" hx-target="#drawer-body">Abbrechen</button>
+    </div>
+  </form>
+</div>
