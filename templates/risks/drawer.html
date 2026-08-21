@@ -1,0 +1,211 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ reference_code }}</span>
+    <span class="badge {{ status_css }}">{{ status_label }}</span>
+    <span class="badge {{ inherent_badge_css }}">Brutto: {{ inherent_score }} ({{ inherent_rating_label }})</span>
+    <span class="badge {{ residual_badge_css }}">Netto: {{ residual_score }} ({{ residual_rating_label }})</span>
+  </div>
+  <h3 style="margin: 0.25rem 0;">{{ title }}</h3>
+  {% if !classification_note.is_empty() %}
+  <p class="badge badge-info" style="margin-top: 0.25rem;">{{ classification_note }}</p>
+  {% endif %}
+  {% if status == "accepted" %}
+  <p class="muted" style="margin: 0.5rem 0 0; font-size: 13px;">
+    <strong>Akzeptiert durch:</strong> {{ accepted_by_name }} · {{ accepted_at_label }}
+  </p>
+  {% endif %}
+</div>
+
+<div class="drawer-section">
+  <h4>Risikobewertung &amp; Behandlung</h4>
+  {% if can_edit %}
+  <form method="post" action="/risks/{{ id }}" hx-post="/risks/{{ id }}" class="form-grid">
+    <div class="form-field">
+      <label class="label" for="d-risk-code">Referenz-Code</label>
+      <input id="d-risk-code" name="reference_code" class="input" required maxlength="32" value="{{ reference_code }}">
+    </div>
+    <div class="form-field">
+      <label class="label" for="d-risk-title">Titel</label>
+      <input id="d-risk-title" name="title" class="input" required maxlength="200" value="{{ title }}">
+    </div>
+    <div class="form-field">
+      <label class="label" for="d-risk-threat">Bedrohungsbeschreibung</label>
+      <textarea id="d-risk-threat" name="threat_description" class="textarea textarea-lg" required>{{ threat_description }}</textarea>
+    </div>
+    <div class="form-field">
+      <label class="label" for="d-risk-vuln">Schwachstelle</label>
+      <textarea id="d-risk-vuln" name="vulnerability_description" class="textarea">{{ vulnerability_description }}</textarea>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="d-risk-ia">Informationswert</label>
+      <select id="d-risk-ia" name="affected_information_asset_id" class="select"
+              hx-get="/risks/impact-hint"
+              hx-include="#d-risk-ia, #d-risk-sa"
+              hx-target="#d-risk-impact-hint">
+        <option value="">— Kein spezifischer Informationswert —</option>
+        {% for ia in info_assets %}
+        <option value="{{ ia.id }}" {% if ia.selected %}selected{% endif %}>{{ ia.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="d-risk-sa">System-Asset</label>
+      <select id="d-risk-sa" name="affected_system_asset_id" class="select"
+              hx-get="/risks/impact-hint"
+              hx-include="#d-risk-ia, #d-risk-sa"
+              hx-target="#d-risk-impact-hint">
+        <option value="">— Kein spezifisches System-Asset —</option>
+        {% for sa in system_assets %}
+        <option value="{{ sa.id }}" {% if sa.selected %}selected{% endif %}>{{ sa.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div id="d-risk-impact-hint"></div>
+
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-inh-l">Brutto W (1–5)</label>
+        <input id="d-inh-l" name="inherent_likelihood" type="number" min="1" max="5" value="{{ inherent_likelihood }}" class="input" required>
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-inh-i">Brutto A (1–5)</label>
+        <input id="d-inh-i" name="inherent_impact" type="number" min="1" max="5" value="{{ inherent_impact }}" class="input" required>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-res-l">Netto W (1–5)</label>
+        <input id="d-res-l" name="residual_likelihood" type="number" min="1" max="5" value="{{ residual_likelihood }}" class="input" required>
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-res-i">Netto A (1–5)</label>
+        <input id="d-res-i" name="residual_impact" type="number" min="1" max="5" value="{{ residual_impact }}" class="input" required>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-strategy">Strategie</label>
+        <select id="d-strategy" name="treatment_strategy" class="select">
+          <option value="mitigate" {% if treatment_strategy == "mitigate" %}selected{% endif %}>Mindern</option>
+          <option value="accept" {% if treatment_strategy == "accept" %}selected{% endif %}>Akzeptieren</option>
+          <option value="avoid" {% if treatment_strategy == "avoid" %}selected{% endif %}>Vermeiden</option>
+          <option value="transfer" {% if treatment_strategy == "transfer" %}selected{% endif %}>Übertragen</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-status">Status</label>
+        <select id="d-status" name="status" class="select">
+          <option value="identified" {% if status == "identified" %}selected{% endif %}>Identifiziert</option>
+          <option value="assessed" {% if status == "assessed" %}selected{% endif %}>Bewertet</option>
+          <option value="treating" {% if status == "treating" %}selected{% endif %}>In Behandlung</option>
+          {% if can_accept_elevated || residual_score < 10 || status == "accepted" %}
+          <option value="accepted" {% if status == "accepted" %}selected{% endif %}>Akzeptiert</option>
+          {% endif %}
+          <option value="closed" {% if status == "closed" %}selected{% endif %}>Geschlossen</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="d-plan">Behandlungsplan</label>
+      <textarea id="d-plan" name="treatment_plan" class="textarea textarea-lg">{{ treatment_plan }}</textarea>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="d-acc">Akzeptanzbegründung</label>
+      <textarea id="d-acc" name="acceptance_justification" class="textarea">{{ acceptance_justification }}</textarea>
+    </div>
+
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-unit">Einheit</label>
+        <select id="d-unit" name="owner_unit_id" class="select">
+          <option value="">— Keine Einheit —</option>
+          {% for u in units %}
+          <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-user">Verantwortlich</label>
+        <select id="d-user" name="owner_user_id" class="select">
+          <option value="">— Keine Person —</option>
+          {% for u in users %}
+          <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="label" for="d-review">Nächstes Review</label>
+      <input id="d-review" name="next_review_due_at" type="date" class="input" value="{{ next_review_date }}">
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+      <button type="button" class="btn btn-sm"
+              hx-get="/actions/new?linked_risk_id={{ id }}"
+              hx-target="#drawer-body">+ Maßnahme</button>
+    </div>
+  </form>
+  {% else %}
+  <p><strong>Bedrohung:</strong> {{ threat_description }}</p>
+  {% if !vulnerability_description.is_empty() %}
+  <p><strong>Schwachstelle:</strong> {{ vulnerability_description }}</p>
+  {% endif %}
+  {% if !treatment_plan.is_empty() %}
+  <p><strong>Behandlungsplan:</strong> {{ treatment_plan }}</p>
+  {% endif %}
+  {% if !acceptance_justification.is_empty() %}
+  <p><strong>Akzeptanzbegründung:</strong> {{ acceptance_justification }}</p>
+  {% endif %}
+  {% endif %}
+</div>
+
+<div class="drawer-section">
+  <h4>Verknüpfte SoA-Controls ({{ linked_controls.len() }})</h4>
+  {% if linked_controls.is_empty() %}
+  <p class="muted">Noch keine risikomindernden Controls verknüpft.</p>
+  {% else %}
+  <ul class="stack-sm" style="list-style: none; padding: 0; margin: 0 0 0.75rem;">
+    {% for c in linked_controls %}
+    <li class="toolbar" style="margin: 0; padding: 0.4rem 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+      <div>
+        <a href="/soa?framework={{ c.framework_code }}&amp;q={{ c.control_code }}"><strong>{{ c.control_code }}</strong> · {{ c.title }}</a>
+        <span class="badge badge-neutral">{{ c.status_label }}</span>
+      </div>
+      {% if can_edit %}
+      <form method="post" action="/risks/{{ id }}/controls/{{ c.soa_entry_id }}/unlink"
+            hx-post="/risks/{{ id }}/controls/{{ c.soa_entry_id }}/unlink" class="inline-form">
+        <button type="submit" class="btn btn-sm">Lösen</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if can_edit && !available_controls.is_empty() %}
+  <form method="post" action="/risks/{{ id }}/controls" hx-post="/risks/{{ id }}/controls" class="toolbar-group">
+    <select name="soa_entry_id" class="select" required>
+      {% for ac in available_controls %}
+      <option value="{{ ac.id }}">{{ ac.label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-sm">Control verknüpfen</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if can_edit %}
+<div class="drawer-section">
+  <form method="post" action="/risks/{{ id }}/delete" hx-post="/risks/{{ id }}/delete"
+        hx-confirm="Risikoszenario {{ reference_code }} wirklich löschen?">
+    <button type="submit" class="btn btn-sm btn-danger">Risikoszenario löschen</button>
+  </form>
+</div>
+{% endif %}

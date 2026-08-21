@@ -1,0 +1,199 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Risikomanagement &amp; 5×5-Heatmap</h1>
+    <p class="page-subtitle">ISO/IEC 27001 Kap. 6.1.2 / 6.1.3 &amp; § 30 BSIG · Brutto-/Netto-Risikobewertung</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/risks/export.csv?delimiter=semicolon">CSV (Excel)</a>
+    <a class="btn btn-sm" href="/risks/export.pdf">RTP-PDF exportieren</a>
+    {% if can_create %}
+    <button type="button" class="btn btn-primary btn-sm" data-shortcut="n"
+            hx-get="/risks/new" hx-target="#drawer-body">+ Neues Risikoszenario <kbd>n</kbd></button>
+    {% endif %}
+  </div>
+</div>
+
+<section class="heatmap-layout" style="margin-bottom: 1.25rem;">
+  <div class="card">
+    <div class="toolbar" style="margin-bottom: 0.75rem;">
+      <div class="toolbar-group">
+        <a class="btn btn-sm {% if !is_inherent_mode %}btn-primary{% endif %}"
+           href="{{ mode_residual_href }}"
+           hx-get="{{ mode_residual_href }}"
+           hx-target="#main-content" hx-push-url="true">Netto-Risiko</a>
+        <a class="btn btn-sm {% if is_inherent_mode %}btn-primary{% endif %}"
+           href="{{ mode_inherent_href }}"
+           hx-get="{{ mode_inherent_href }}"
+           hx-target="#main-content" hx-push-url="true">Brutto-Risiko</a>
+      </div>
+      {% if has_cell_filter %}
+      <a class="btn btn-sm" href="{{ clear_cell_href }}"
+         hx-get="{{ clear_cell_href }}" hx-target="#main-content" hx-push-url="true">
+        Zellfilter {{ filter_likelihood }}×{{ filter_impact }} aufheben
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="heatmap-wrap">
+      <div class="heatmap-y-label">Wahrscheinlichkeit (1–5)</div>
+      <div>
+        <div class="heatmap-grid" role="grid" aria-label="5×5 Risikomatrix">
+          {% for hrow in heatmap_rows %}
+          <div class="hm-row-label">{{ hrow.likelihood }}</div>
+          {% for cell in hrow.cells %}
+          <a class="hm-cell {{ cell.css_class }}{% if cell.is_active %} hm-active{% endif %}"
+             href="{{ cell.href }}"
+             hx-get="{{ cell.href }}"
+             hx-target="#main-content"
+             hx-push-url="true"
+             title="Wahrscheinlichkeit {{ cell.likelihood }} × Auswirkung {{ cell.impact }}: {{ cell.count }} Risiko(en)">
+            {{ cell.count }}
+          </a>
+          {% endfor %}
+          {% endfor %}
+          <div></div>
+          <div class="heatmap-x-label">1</div>
+          <div class="heatmap-x-label">2</div>
+          <div class="heatmap-x-label">3</div>
+          <div class="heatmap-x-label">4</div>
+          <div class="heatmap-x-label">5</div>
+        </div>
+        <div class="heatmap-x-label" style="margin-top: 0.35rem;">Auswirkung (1–5)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card risk-summary-card stack-sm">
+    <h2 style="margin: 0; font-size: 15px;">
+      Verteilung ({% if is_inherent_mode %}Brutto{% else %}Netto{% endif %}) · {{ total_count }} Szenarien
+    </h2>
+    <div class="stack-sm">
+      <div class="toolbar" style="margin: 0;">
+        <span><span class="badge badge-danger">Kritisch (16–25)</span></span>
+        <strong>{{ count_critical }}</strong>
+      </div>
+      <div class="toolbar" style="margin: 0;">
+        <span><span class="badge badge-high">Hoch (10–15)</span></span>
+        <strong>{{ count_high }}</strong>
+      </div>
+      <div class="toolbar" style="margin: 0;">
+        <span><span class="badge badge-warning">Mittel (5–9)</span></span>
+        <strong>{{ count_medium }}</strong>
+      </div>
+      <div class="toolbar" style="margin: 0;">
+        <span><span class="badge badge-approved">Gering (1–4)</span></span>
+        <strong>{{ count_low }}</strong>
+      </div>
+    </div>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 0.25rem 0;">
+    <p class="muted" style="margin: 0; font-size: 13px;">
+      <strong>C3/C4-Schutzbedarfskopplung:</strong> {{ c3_c4_coupled_count }} Szenario(en) betreffen vertrauliche oder streng vertrauliche Informationswerte.
+    </p>
+    <p class="muted" style="margin: 0; font-size: 13px;">
+      <strong>Überfällige Reviews:</strong> {{ overdue_count }}
+    </p>
+  </div>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <form method="get" action="/risks" class="toolbar-group"
+          hx-get="/risks" hx-target="#main-content" hx-push-url="true">
+      <input type="hidden" name="mode" value="{{ mode }}">
+      {% if has_cell_filter %}
+      <input type="hidden" name="likelihood" value="{{ filter_likelihood }}">
+      <input type="hidden" name="impact" value="{{ filter_impact }}">
+      {% endif %}
+      <select name="status" class="select">
+        <option value="">Alle Status</option>
+        <option value="identified" {% if filter_status == "identified" %}selected{% endif %}>Identifiziert</option>
+        <option value="assessed" {% if filter_status == "assessed" %}selected{% endif %}>Bewertet</option>
+        <option value="treating" {% if filter_status == "treating" %}selected{% endif %}>In Behandlung</option>
+        <option value="accepted" {% if filter_status == "accepted" %}selected{% endif %}>Akzeptiert</option>
+        <option value="closed" {% if filter_status == "closed" %}selected{% endif %}>Geschlossen</option>
+      </select>
+      <select name="strategy" class="select">
+        <option value="">Alle Strategien</option>
+        <option value="mitigate" {% if filter_strategy == "mitigate" %}selected{% endif %}>Mindern</option>
+        <option value="accept" {% if filter_strategy == "accept" %}selected{% endif %}>Akzeptieren</option>
+        <option value="avoid" {% if filter_strategy == "avoid" %}selected{% endif %}>Vermeiden</option>
+        <option value="transfer" {% if filter_strategy == "transfer" %}selected{% endif %}>Übertragen</option>
+      </select>
+      <select name="unit_id" class="select">
+        <option value="">Alle Einheiten</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+      <label class="checkbox-label">
+        <input type="checkbox" name="overdue" value="true" {% if filter_overdue %}checked{% endif %}>
+        Review fällig
+      </label>
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code, Titel oder Owner…">
+      <button type="submit" class="btn btn-sm">Filtern</button>
+    </form>
+
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Wählen</span>
+      <span><kbd>Enter</kbd> Details</span>
+      {% if can_create %}
+      <span><kbd>n</kbd> Neu</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Risikoszenario</th>
+          <th>Asset</th>
+          <th>Brutto</th>
+          <th>Netto</th>
+          <th>Strategie</th>
+          <th>Status</th>
+          <th>Controls</th>
+          <th>Review</th>
+          <th>Verantwortlich</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows.is_empty() %}
+        <tr><td colspan="10" class="muted">Keine Risikoszenarien für diese Filterauswahl gefunden.</td></tr>
+        {% else %}
+        {% for row in rows %}
+        <tr class="selectable-row"
+            data-title="{{ row.reference_code }} · {{ row.title }}"
+            data-drawer-url="/risks/{{ row.id }}/drawer">
+          <td><span class="code-pill">{{ row.reference_code }}</span></td>
+          <td><strong>{{ row.title }}</strong></td>
+          <td>{{ row.asset_label }}</td>
+          <td>
+            <span class="badge {{ row.inherent_badge_css }}">
+              {{ row.inherent_likelihood }}×{{ row.inherent_impact }} = {{ row.inherent_score }} ({{ row.inherent_rating_label }})
+            </span>
+          </td>
+          <td>
+            <span class="badge {{ row.residual_badge_css }}">
+              {{ row.residual_likelihood }}×{{ row.residual_impact }} = {{ row.residual_score }} ({{ row.residual_rating_label }})
+            </span>
+          </td>
+          <td>{{ row.strategy_label }}</td>
+          <td><span class="badge {{ row.status_css }}">{{ row.status_label }}</span></td>
+          <td>{{ row.control_count }}</td>
+          <td>
+            {% if row.is_overdue %}
+            <span class="badge badge-danger">{{ row.next_review_label }}</span>
+            {% else %}
+            {{ row.next_review_label }}
+            {% endif %}
+          </td>
+          <td>{{ row.owner_label }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

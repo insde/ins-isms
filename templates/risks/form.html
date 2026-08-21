@@ -1,0 +1,133 @@
+<form method="post" action="/risks" hx-post="/risks" class="form-grid">
+  <div class="form-field">
+    <label class="label" for="risk-code">Referenz-Code *</label>
+    <input id="risk-code" name="reference_code" class="input" required maxlength="32" value="{{ suggested_code }}">
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-title">Titel des Risikoszenarios *</label>
+    <input id="risk-title" name="title" class="input" required maxlength="200" placeholder="z. B. Ransomware-Verschlüsselung von Dateiservern">
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-threat">Bedrohungsbeschreibung *</label>
+    <textarea id="risk-threat" name="threat_description" class="textarea textarea-lg" required placeholder="Welche Bedrohung wirkt auf das Asset?"></textarea>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-vuln">Schwachstelle</label>
+    <textarea id="risk-vuln" name="vulnerability_description" class="textarea" placeholder="Welche Schwachstelle wird ausgenutzt?"></textarea>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-info-asset">Betroffener Informationswert</label>
+    <select id="risk-info-asset" name="affected_information_asset_id" class="select"
+            hx-get="/risks/impact-hint"
+            hx-include="#risk-info-asset, #risk-sys-asset"
+            hx-target="#risk-impact-hint">
+      <option value="">— Kein spezifischer Informationswert —</option>
+      {% for ia in info_assets %}
+      <option value="{{ ia.id }}">{{ ia.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-sys-asset">Betroffenes System-Asset</label>
+    <select id="risk-sys-asset" name="affected_system_asset_id" class="select"
+            hx-get="/risks/impact-hint"
+            hx-include="#risk-info-asset, #risk-sys-asset"
+            hx-target="#risk-impact-hint">
+      <option value="">— Kein spezifisches System-Asset —</option>
+      {% for sa in system_assets %}
+      <option value="{{ sa.id }}">{{ sa.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="risk-impact-hint"></div>
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="risk-inh-l">Brutto-Wahrscheinlichkeit (1–5)</label>
+      <input id="risk-inh-l" name="inherent_likelihood" type="number" min="1" max="5" value="3" class="input" required>
+    </div>
+    <div class="form-field">
+      <label class="label" for="risk-inh-i">Brutto-Auswirkung (1–5)</label>
+      <input id="risk-inh-i" name="inherent_impact" type="number" min="1" max="5" value="3" class="input" required>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="risk-res-l">Netto-Wahrscheinlichkeit (1–5)</label>
+      <input id="risk-res-l" name="residual_likelihood" type="number" min="1" max="5" value="2" class="input" required>
+    </div>
+    <div class="form-field">
+      <label class="label" for="risk-res-i">Netto-Auswirkung (1–5)</label>
+      <input id="risk-res-i" name="residual_impact" type="number" min="1" max="5" value="3" class="input" required>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="risk-strategy">Behandlungsstrategie</label>
+      <select id="risk-strategy" name="treatment_strategy" class="select">
+        <option value="mitigate">Mindern</option>
+        <option value="accept">Akzeptieren</option>
+        <option value="avoid">Vermeiden</option>
+        <option value="transfer">Übertragen</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="risk-status">Status</label>
+      <select id="risk-status" name="status" class="select">
+        <option value="identified">Identifiziert</option>
+        <option value="assessed">Bewertet</option>
+        <option value="treating">In Behandlung</option>
+        <option value="accepted">Akzeptiert</option>
+        <option value="closed">Geschlossen</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-plan">Behandlungsplan</label>
+    <textarea id="risk-plan" name="treatment_plan" class="textarea textarea-lg"></textarea>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-acc">Akzeptanzbegründung (Pflicht bei Netto Hoch/Kritisch &amp; Status Akzeptiert)</label>
+    <textarea id="risk-acc" name="acceptance_justification" class="textarea"></textarea>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="risk-unit">Verantwortliche Einheit</label>
+      <select id="risk-unit" name="owner_unit_id" class="select">
+        <option value="">— Keine Einheit —</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="risk-user">Verantwortliche Person</label>
+      <select id="risk-user" name="owner_user_id" class="select">
+        <option value="">— Keine Person —</option>
+        {% for u in users %}
+        <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="risk-review">Nächstes Review-Datum</label>
+    <input id="risk-review" name="next_review_due_at" type="date" class="input">
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Risikoszenario anlegen</button>
+  </div>
+</form>

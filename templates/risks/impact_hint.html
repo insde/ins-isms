@@ -1,0 +1,13 @@
+{% if has_hint %}
+<div class="card" style="padding: 0.65rem 0.85rem; border-color: var(--info-bd); background: var(--info-bg); color: var(--info-fg); font-size: 13px;">
+  {% if !info_hint.is_empty() %}
+  <div>{{ info_hint }}</div>
+  {% endif %}
+  {% if !system_hint.is_empty() %}
+  <div>{{ system_hint }}</div>
+  {% endif %}
+  {% if suggested_impact > 0 %}
+  <div><strong>Empfehlung:</strong> Brutto-Auswirkung auf mindestens <strong>{{ suggested_impact }}</strong> setzen.</div>
+  {% endif %}
+</div>
+{% endif %}
