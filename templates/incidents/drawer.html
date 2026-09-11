@@ -1,0 +1,35 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ reference_code }}</span>
+    <span class="badge {{ severity_css }}">{{ severity_label }}</span>
+    <span class="badge {{ status_css }}">{{ status_label }}</span>
+  </div>
+  <h3 style="margin: 0.25rem 0;">{{ title }}</h3>
+  <p style="margin: 0.5rem 0; font-size: 13px;">{{ description }}</p>
+</div>
+
+<div class="drawer-section">
+  <dl class="drawer-meta">
+    <dt>Erkannt am</dt>
+    <dd><span class="code-pill">{{ detected_label }}</span></dd>
+    <dt>Einheit</dt>
+    <dd>{{ unit_label }}</dd>
+    <dt>Einsatzleitung</dt>
+    <dd>{{ handler_label }}</dd>
+  </dl>
+</div>
+
+{% if is_nis2_significant %}
+<div class="drawer-section">
+  <h4>NIS2-Meldefristen (§ 32 BSIG)</h4>
+  <div class="toolbar-group" style="flex-wrap: wrap;">
+    {% for b in nis2_badges %}
+    <span class="badge {{ b.css_class }}">{{ b.label }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="form-actions" style="margin-top: 1rem;">
+  <a class="btn btn-primary" href="/incidents/{{ id }}">Einsatz-Timeline &amp; Details öffnen</a>
+</div>

@@ -1,0 +1,67 @@
+<form method="post" action="/incidents" hx-post="/incidents" class="form-grid">
+  <div class="form-field">
+    <label class="label" for="inc-ref">Referenz-Code (optional, sonst automatisch)</label>
+    <input id="inc-ref" name="reference_code" class="input" maxlength="32" placeholder="z. B. INC-2026-001">
+  </div>
+  <div class="form-field">
+    <label class="label" for="inc-title">Titel / Zusammenfassung</label>
+    <input id="inc-title" name="title" class="input" required maxlength="255" placeholder="z. B. Verdächtige Anmeldung auf Mailserver">
+  </div>
+  <div class="form-field">
+    <label class="label" for="inc-desc">Beschreibung</label>
+    <textarea id="inc-desc" name="description" class="textarea" required></textarea>
+  </div>
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="inc-sev">Schweregrad</label>
+      <select id="inc-sev" name="severity" class="select">
+        <option value="low">Niedrig</option>
+        <option value="medium" selected>Mittel</option>
+        <option value="high">Hoch</option>
+        <option value="critical">Kritisch</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="inc-det">Erkennungszeitpunkt</label>
+      <input id="inc-det" name="detected_at" type="datetime-local" class="input" value="{{ default_detected_at }}">
+    </div>
+  </div>
+  <div class="form-field">
+    <label class="label" for="inc-asset">Betroffenes System-Asset</label>
+    <select id="inc-asset" name="affected_system_asset_id" class="select">
+      <option value="">— Kein spezifisches System —</option>
+      {% for a in system_assets %}
+      <option value="{{ a.id }}">{{ a.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="inc-unit">Organisationseinheit</label>
+      <select id="inc-unit" name="owner_unit_id" class="select">
+        <option value="">— Keine Einheit —</option>
+        {% for u in units %}
+        <option value="{{ u.id }}">{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="inc-lead">Einsatzleitung</label>
+      <select id="inc-lead" name="lead_handler_id" class="select">
+        <option value="">— Nicht zugewiesen —</option>
+        {% for u in users %}
+        <option value="{{ u.id }}">{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% if can_classify_nis2 %}
+  <label class="toolbar-group" style="font-size: 13px; gap: 0.45rem;">
+    <input type="checkbox" name="is_nis2_significant" value="1">
+    Erheblicher Sicherheitsvorfall nach § 32 BSIG (24h/72h-Fristen starten)
+  </label>
+  {% endif %}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Vorfall erfassen</button>
+  </div>
+</form>

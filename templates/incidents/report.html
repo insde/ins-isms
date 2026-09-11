@@ -1,0 +1,46 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Sicherheitsvorfall melden</h1>
+    <p class="page-subtitle">Schnelle Meldung verdächtiger Ereignisse (Phishing, Geräteverlust, Datenpanne) an das ISMS-Team</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/incidents">Zurück zu Vorfällen</a>
+  </div>
+</div>
+
+<div class="card" style="max-width: 720px;">
+  <form method="post" action="/incidents/report" hx-post="/incidents/report" class="form-grid">
+    <div class="form-field">
+      <label class="label" for="rep-title">Was ist passiert? (Kurzfassung)</label>
+      <input id="rep-title" name="title" class="input" required maxlength="255"
+             placeholder="z. B. Dienst-Laptop im Zug verloren / Verdächtige E-Mail">
+    </div>
+    <div class="form-field">
+      <label class="label" for="rep-desc">Detaillierte Beschreibung (Zeitpunkt, betroffene Daten, bisherige Schritte)</label>
+      <textarea id="rep-desc" name="description" class="textarea textarea-lg" required></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="rep-sev">Geschätzte Dringlichkeit</label>
+        <select id="rep-sev" name="severity" class="select">
+          <option value="low">Niedrig (Verdacht / Hinweis)</option>
+          <option value="medium" selected>Mittel (Beeinträchtigung)</option>
+          <option value="high">Hoch (Sicherheitsvorfall)</option>
+          <option value="critical">Kritisch (Akuter Ausfall / Datenabfluss)</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="label" for="rep-asset">Betroffenes System (optional)</label>
+        <select id="rep-asset" name="affected_system_asset_id" class="select">
+          <option value="">— Unbekannt / Nicht zutreffend —</option>
+          {% for a in system_assets %}
+          <option value="{{ a.id }}">{{ a.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Vorfall verbindlich melden</button>
+    </div>
+  </form>
+</div>

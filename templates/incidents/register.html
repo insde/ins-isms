@@ -1,0 +1,111 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Sicherheitsvorfälle &amp; NIS2-Meldefristen</h1>
+    <p class="page-subtitle">ISO/IEC 27001 A.5.24–A.5.28 &amp; § 32 BSIG · {{ open_count }} offene Vorfälle ({{ nis2_open_count }} NIS2-relevant)</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/incidents/report">Vorfall melden (Schnellformular)</a>
+    {% if can_create %}
+    <button type="button" class="btn btn-primary btn-sm" data-shortcut="n"
+            hx-get="/incidents/new" hx-target="#drawer-body">+ Neuer Vorfall <kbd>n</kbd></button>
+    {% endif %}
+  </div>
+</div>
+
+{% if is_employee %}
+<div class="card" style="margin-bottom: 1rem;">
+  <p class="muted" style="margin: 0; font-size: 13px;">
+    Sie sehen hier ausschließlich Ihre selbst gemeldeten Sicherheitsvorfälle. Nutzen Sie für neue Meldungen das
+    <a href="/incidents/report">Mitarbeiter-Meldeformular</a>.
+  </p>
+</div>
+{% endif %}
+
+<section class="table-card">
+  <div class="toolbar">
+    <form method="get" action="/incidents" class="toolbar-group"
+          hx-get="/incidents" hx-target="#main-content" hx-push-url="true">
+      <select name="status" class="select">
+        <option value="">Alle Status</option>
+        <option value="detected" {% if filter_status == "detected" %}selected{% endif %}>Erkannt</option>
+        <option value="analyzing" {% if filter_status == "analyzing" %}selected{% endif %}>In Analyse</option>
+        <option value="contained" {% if filter_status == "contained" %}selected{% endif %}>Eingedämmt</option>
+        <option value="eradicated" {% if filter_status == "eradicated" %}selected{% endif %}>Behoben</option>
+        <option value="closed" {% if filter_status == "closed" %}selected{% endif %}>Geschlossen</option>
+      </select>
+      <select name="severity" class="select">
+        <option value="">Alle Schweregrade</option>
+        <option value="critical" {% if filter_severity == "critical" %}selected{% endif %}>Kritisch</option>
+        <option value="high" {% if filter_severity == "high" %}selected{% endif %}>Hoch</option>
+        <option value="medium" {% if filter_severity == "medium" %}selected{% endif %}>Mittel</option>
+        <option value="low" {% if filter_severity == "low" %}selected{% endif %}>Niedrig</option>
+      </select>
+      <label class="toolbar-group" style="font-size: 13px; gap: 0.35rem;">
+        <input type="checkbox" name="nis2_only" value="1" {% if filter_nis2_only %}checked{% endif %}>
+        Nur NIS2-meldepflichtig
+      </label>
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code oder Titel suchen…">
+      <button type="submit" class="btn btn-sm">Filtern</button>
+      {% if !filter_status.is_empty() || !filter_severity.is_empty() || filter_nis2_only || !filter_q.is_empty() %}
+      <a class="btn btn-sm" href="/incidents" hx-get="/incidents" hx-target="#main-content" hx-push-url="true">Zurücksetzen</a>
+      {% endif %}
+    </form>
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>Enter</kbd> Kurzansicht</span>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Referenz</th>
+          <th>Vorfall</th>
+          <th>Schwere</th>
+          <th>Status</th>
+          <th>NIS2-Fristen (§ 32 BSIG)</th>
+          <th>Einheit / Bearbeiter</th>
+          <th>Erkannt</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows.is_empty() %}
+        <tr><td colspan="7" class="muted">Keine Sicherheitsvorfälle für diesen Filter vorhanden.</td></tr>
+        {% else %}
+        {% for row in rows %}
+        <tr class="selectable-row"
+            data-row
+            data-title="{{ row.reference_code }} · {{ row.title }}"
+            data-drawer-url="/incidents/{{ row.id }}/drawer">
+          <td>
+            <a href="/incidents/{{ row.id }}" class="code-pill">{{ row.reference_code }}</a>
+          </td>
+          <td>
+            <a href="/incidents/{{ row.id }}"><strong>{{ row.title }}</strong></a>
+            {% if !row.is_closed %}
+            <span class="badge badge-info" style="margin-left: 0.35rem;">Aktiv</span>
+            {% endif %}
+          </td>
+          <td><span class="badge {{ row.severity_css }}">{{ row.severity_label }}</span></td>
+          <td><span class="badge {{ row.status_css }}">{{ row.status_label }}</span></td>
+          <td>
+            {% if row.is_nis2_significant %}
+            <div class="toolbar-group" style="gap: 0.25rem; flex-wrap: wrap;">
+              {% for b in row.nis2_badges %}
+              <span class="badge {{ b.css_class }}">{{ b.label }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <span class="muted">–</span>
+            {% endif %}
+          </td>
+          <td>{{ row.unit_label }} · {{ row.handler_label }}</td>
+          <td><span class="code-pill">{{ row.detected_label }}</span></td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

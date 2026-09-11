@@ -1,0 +1,14 @@
+<div id="incident-timeline-list" class="stack-sm">
+  {% if events.is_empty() %}
+  <p class="muted" style="margin: 0; font-size: 13px;">Noch keine Einträge in der Einsatz-Timeline.</p>
+  {% else %}
+  {% for ev in events %}
+  <div style="border-left: 2px solid var(--border); padding-left: 0.75rem; margin-bottom: 0.65rem;">
+    <div class="muted" style="font-size: 12px;">
+      <span class="code-pill">{{ ev.occurred_label }}</span> · <strong>{{ ev.author_name }}</strong>
+    </div>
+    <p style="margin: 0.25rem 0 0; font-size: 13px;">{{ ev.note }}</p>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
