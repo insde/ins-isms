@@ -1,0 +1,201 @@
+<div class="page-header">
+  <div>
+    <div class="toolbar-group" style="margin-bottom: 0.25rem;">
+      <span class="code-pill">{{ audit_code }}</span>
+      <span class="badge {{ status_css }}">{{ status_label }}</span>
+    </div>
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="page-subtitle">Lead-Auditor: {{ auditor_name }} · Datum: {{ audit_date_label }}</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/audits">Zurück zum Auditprogramm</a>
+    <a class="btn btn-sm" href="/management-reviews">Management-Bewertung</a>
+  </div>
+</div>
+
+<section class="grid-2" style="align-items: start; margin-bottom: 1.5rem;">
+  <div class="card">
+    <h2 style="margin: 0 0 0.75rem; font-size: 15px;">Audit-Stammdaten &amp; Zusammenfassung</h2>
+    {% if can_manage %}
+    <form method="post" action="/audits/{{ id }}" hx-post="/audits/{{ id }}" class="form-grid">
+      <div class="form-field">
+        <label class="label" for="aud-det-title">Titel</label>
+        <input id="aud-det-title" name="title" class="input" required maxlength="200" value="{{ title }}">
+      </div>
+      <div class="grid-2">
+        <div class="form-field">
+          <label class="label" for="aud-det-auditor">Lead-Auditor</label>
+          <input id="aud-det-auditor" name="auditor_name" class="input" required maxlength="200" value="{{ auditor_name }}">
+        </div>
+        <div class="form-field">
+          <label class="label" for="aud-det-date">Audit-Datum</label>
+          <input id="aud-det-date" name="audit_date" type="date" class="input" required value="{{ audit_date_input }}">
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="label" for="aud-det-status">Status</label>
+        <select id="aud-det-status" name="status" class="select">
+          <option value="planned" {% if status == "planned" %}selected{% endif %}>Geplant</option>
+          <option value="in_progress" {% if status == "in_progress" %}selected{% endif %}>In Durchführung</option>
+          <option value="completed" {% if status == "completed" %}selected{% endif %}>Abgeschlossen</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="label" for="aud-det-scope">Audit-Scope</label>
+        <textarea id="aud-det-scope" name="scope" class="textarea" required>{{ scope }}</textarea>
+      </div>
+      <div class="form-field">
+        <label class="label" for="aud-det-sum">Zusammenfassender Auditbericht</label>
+        <textarea id="aud-det-sum" name="summary_report" class="textarea textarea-lg">{{ summary_report }}</textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Audit speichern</button>
+      </div>
+    </form>
+    {% else %}
+    <dl class="drawer-meta">
+      <dt>Scope</dt>
+      <dd>{{ scope }}</dd>
+      <dt>Zusammenfassung</dt>
+      <dd>{{ summary_report }}</dd>
+    </dl>
+    {% endif %}
+  </div>
+
+  <div class="stack-sm">
+    <div class="card">
+      <h2 style="margin: 0 0 0.75rem; font-size: 15px;">Externer Auditbericht (PDF)</h2>
+      {% if has_report %}
+      <p style="margin: 0 0 0.5rem; font-size: 13px;">
+        <strong>Datei:</strong> {{ attached_report_filename }}
+      </p>
+      <p class="muted" style="margin: 0 0 0.75rem; font-size: 12px; word-break: break-all;">
+        SHA-256: <span class="code-pill">{{ attached_report_sha256 }}</span>
+      </p>
+      <div class="form-actions" style="margin-bottom: 0.75rem;">
+        <a class="btn btn-sm btn-primary" href="/audits/{{ id }}/report">PDF-Bericht herunterladen</a>
+      </div>
+      {% else %}
+      <p class="muted" style="margin: 0 0 0.75rem; font-size: 13px;">Noch kein externer PDF-Bericht hinterlegt.</p>
+      {% endif %}
+
+      {% if can_manage %}
+      <form method="post" action="/audits/{{ id }}/report" enctype="multipart/form-data" class="form-grid">
+        <div class="form-field">
+          <label class="label" for="aud-rep-file">Neuen PDF-Bericht hochladen</label>
+          <input id="aud-rep-file" name="report_file" type="file" accept="application/pdf" class="input" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-sm">PDF hochladen</button>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if can_manage %}
+    <div class="card">
+      <h2 style="margin: 0 0 0.75rem; font-size: 15px;">Neue Feststellung / Abweichung erfassen</h2>
+      <form method="post" action="/audits/{{ id }}/findings" hx-post="/audits/{{ id }}/findings" class="form-grid">
+        <div class="grid-2">
+          <div class="form-field">
+            <label class="label" for="fnd-code">Code (optional)</label>
+            <input id="fnd-code" name="finding_code" class="input" maxlength="32" placeholder="z. B. FND-01">
+          </div>
+          <div class="form-field">
+            <label class="label" for="fnd-type">Typ</label>
+            <select id="fnd-type" name="finding_type" class="select">
+              <option value="major_nc">Major NC (Hauptabweichung)</option>
+              <option value="minor_nc" selected>Minor NC (Nebenabweichung)</option>
+              <option value="observation">Beobachtung</option>
+              <option value="opportunity">Verbesserungspotenzial</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-field">
+            <label class="label" for="fnd-ctrl">Betroffenes Control</label>
+            <select id="fnd-ctrl" name="related_control_id" class="select">
+              <option value="">— Kein Control —</option>
+              {% for c in controls %}
+              <option value="{{ c.id }}">{{ c.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="label" for="fnd-unit">Verantwortliche Einheit</label>
+            <select id="fnd-unit" name="owner_unit_id" class="select">
+              <option value="">— Keine Einheit —</option>
+              {% for u in units %}
+              <option value="{{ u.id }}">{{ u.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="label" for="fnd-desc">Beschreibung der Feststellung</label>
+          <textarea id="fnd-desc" name="description" class="textarea" required></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-sm">Finding erfassen</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <h2 style="margin: 0; font-size: 15px;">Feststellungen in diesem Audit ({{ findings.len() }})</h2>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Typ</th>
+          <th>Control</th>
+          <th>Einheit</th>
+          <th>Status</th>
+          <th>Beschreibung</th>
+          {% if can_manage %}
+          <th>Aktion</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% if findings.is_empty() %}
+        <tr><td colspan="7" class="muted">Keine Feststellungen erfasst.</td></tr>
+        {% else %}
+        {% for f in findings %}
+        <tr>
+          <td><span class="code-pill">{{ f.finding_code }}</span></td>
+          <td><span class="badge {{ f.finding_type_css }}">{{ f.finding_type_label }}</span></td>
+          <td><span class="code-pill">{{ f.control_code }}</span></td>
+          <td>{{ f.unit_name }}</td>
+          <td><span class="badge {{ f.status_css }}">{{ f.status_label }}</span></td>
+          <td>{{ f.description }}</td>
+          {% if can_manage %}
+          <td>
+            <div class="toolbar-group" style="gap: 0.35rem; flex-wrap: wrap;">
+              <form method="post" action="/audits/findings/{{ f.id }}/status" hx-post="/audits/findings/{{ f.id }}/status" class="toolbar-group" style="gap: 0.35rem;">
+                <select name="status" class="select">
+                  <option value="open" {% if f.status_str == "open" %}selected{% endif %}>Offen</option>
+                  <option value="action_planned" {% if f.status_str == "action_planned" %}selected{% endif %}>Maßnahme geplant</option>
+                  <option value="verified_closed" {% if f.status_str == "verified_closed" %}selected{% endif %}>Wirksamkeit bestätigt</option>
+                </select>
+                <button type="submit" class="btn btn-sm">Setzen</button>
+              </form>
+              <form method="post" action="/audits/{{ id }}/findings/{{ f.id }}/capa" hx-post="/audits/{{ id }}/findings/{{ f.id }}/capa" class="inline-form">
+                <button type="submit" class="btn btn-sm btn-primary">+ CAPA</button>
+              </form>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

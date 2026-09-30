@@ -1,0 +1,49 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ audit_code }}</span>
+    <span class="badge {{ status_css }}">{{ status_label }}</span>
+  </div>
+  <h3 style="margin: 0.25rem 0;">{{ title }}</h3>
+  <p style="margin: 0.5rem 0; font-size: 13px;">{{ scope }}</p>
+</div>
+
+<div class="drawer-section">
+  <dl class="drawer-meta">
+    <dt>Lead-Auditor</dt>
+    <dd>{{ auditor_name }}</dd>
+    <dt>Audit-Datum</dt>
+    <dd><span class="code-pill">{{ audit_date_label }}</span></dd>
+    <dt>Externer Bericht</dt>
+    <dd>
+      {% if has_report %}
+      <a href="/audits/{{ id }}/report">{{ attached_report_filename }}</a>
+      {% else %}
+      <span class="muted">Keiner hinterlegt</span>
+      {% endif %}
+    </dd>
+  </dl>
+</div>
+
+<div class="drawer-section">
+  <h4>Feststellungen ({{ findings.len() }})</h4>
+  {% if findings.is_empty() %}
+  <p class="muted" style="margin: 0; font-size: 13px;">Keine Feststellungen vorhanden.</p>
+  {% else %}
+  <div class="stack-sm">
+    {% for f in findings %}
+    <div style="border-left: 2px solid var(--border); padding-left: 0.6rem;">
+      <div class="toolbar-group" style="gap: 0.35rem;">
+        <span class="code-pill">{{ f.finding_code }}</span>
+        <span class="badge {{ f.finding_type_css }}">{{ f.finding_type_label }}</span>
+        <span class="badge {{ f.status_css }}">{{ f.status_label }}</span>
+      </div>
+      <p style="margin: 0.25rem 0 0; font-size: 12px;">{{ f.description }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="form-actions" style="margin-top: 1rem;">
+  <a class="btn btn-primary" href="/audits/{{ id }}">Audit &amp; Findings öffnen</a>
+</div>

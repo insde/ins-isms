@@ -1,0 +1,41 @@
+<form method="post" action="/audits" hx-post="/audits" class="form-grid">
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="aud-code">Audit-Code (optional, sonst automatisch)</label>
+      <input id="aud-code" name="audit_code" class="input" maxlength="32" placeholder="z. B. AUD-2026-01">
+    </div>
+    <div class="form-field">
+      <label class="label" for="aud-date">Audit-Datum</label>
+      <input id="aud-date" name="audit_date" type="date" class="input" required value="{{ default_date }}">
+    </div>
+  </div>
+  <div class="form-field">
+    <label class="label" for="aud-title">Titel</label>
+    <input id="aud-title" name="title" class="input" required maxlength="200" placeholder="z. B. Internes ISMS-Audit 2026">
+  </div>
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="aud-auditor">Lead-Auditor</label>
+      <input id="aud-auditor" name="auditor_name" class="input" required maxlength="200" placeholder="Name / Organisation">
+    </div>
+    <div class="form-field">
+      <label class="label" for="aud-status">Status</label>
+      <select id="aud-status" name="status" class="select">
+        <option value="planned" selected>Geplant</option>
+        <option value="in_progress">In Durchführung</option>
+        <option value="completed">Abgeschlossen</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-field">
+    <label class="label" for="aud-scope">Audit-Scope (Geprüfte Bereiche &amp; Controls)</label>
+    <textarea id="aud-scope" name="scope" class="textarea" required></textarea>
+  </div>
+  <div class="form-field">
+    <label class="label" for="aud-sum">Zusammenfassung (optional)</label>
+    <textarea id="aud-sum" name="summary_report" class="textarea"></textarea>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Audit planen</button>
+  </div>
+</form>

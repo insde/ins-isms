@@ -1,0 +1,137 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Interne Audits &amp; Abweichungen</h1>
+    <p class="page-subtitle">ISO/IEC 27001 Kap. 9.2 · {{ open_nc_count }} offene Haupt-/Nebenabweichungen</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/management-reviews">Management-Bewertung (ISO 9.3)</a>
+    {% if can_manage %}
+    <button type="button" class="btn btn-primary btn-sm" data-shortcut="n"
+            hx-get="/audits/new" hx-target="#drawer-body">+ Neues Audit <kbd>n</kbd></button>
+    {% endif %}
+  </div>
+</div>
+
+{% if is_owner %}
+<div class="card" style="margin-bottom: 1rem;">
+  <p class="muted" style="margin: 0; font-size: 13px;">
+    Sie sehen hier ausschließlich Audits und Abweichungen, die Ihrer Organisationseinheit zugeordnet sind.
+  </p>
+</div>
+{% endif %}
+
+<section class="table-card" style="margin-bottom: 1.5rem;">
+  <div class="toolbar">
+    <form method="get" action="/audits" class="toolbar-group"
+          hx-get="/audits" hx-target="#main-content" hx-push-url="true">
+      <select name="status" class="select">
+        <option value="">Alle Audit-Status</option>
+        <option value="planned" {% if filter_status == "planned" %}selected{% endif %}>Geplant</option>
+        <option value="in_progress" {% if filter_status == "in_progress" %}selected{% endif %}>In Durchführung</option>
+        <option value="completed" {% if filter_status == "completed" %}selected{% endif %}>Abgeschlossen</option>
+      </select>
+      <select name="finding_type" class="select">
+        <option value="">Alle Finding-Typen</option>
+        <option value="major_nc" {% if filter_finding_type == "major_nc" %}selected{% endif %}>Major NC</option>
+        <option value="minor_nc" {% if filter_finding_type == "minor_nc" %}selected{% endif %}>Minor NC</option>
+        <option value="observation" {% if filter_finding_type == "observation" %}selected{% endif %}>Beobachtung</option>
+        <option value="opportunity" {% if filter_finding_type == "opportunity" %}selected{% endif %}>Verbesserungspotenzial</option>
+      </select>
+      <select name="finding_status" class="select">
+        <option value="">Alle Finding-Status</option>
+        <option value="open" {% if filter_finding_status == "open" %}selected{% endif %}>Offen</option>
+        <option value="action_planned" {% if filter_finding_status == "action_planned" %}selected{% endif %}>Maßnahme geplant</option>
+        <option value="verified_closed" {% if filter_finding_status == "verified_closed" %}selected{% endif %}>Wirksamkeit bestätigt</option>
+      </select>
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code, Titel oder Text suchen…">
+      <button type="submit" class="btn btn-sm">Filtern</button>
+      {% if !filter_status.is_empty() || !filter_finding_type.is_empty() || !filter_finding_status.is_empty() || !filter_q.is_empty() %}
+      <a class="btn btn-sm" href="/audits" hx-get="/audits" hx-target="#main-content" hx-push-url="true">Zurücksetzen</a>
+      {% endif %}
+    </form>
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>Enter</kbd> Kurzansicht</span>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Audit-Titel</th>
+          <th>Lead-Auditor</th>
+          <th>Datum</th>
+          <th>Status</th>
+          <th>Offene Findings</th>
+          <th>Bericht</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if audits.is_empty() %}
+        <tr><td colspan="7" class="muted">Keine internen Audits für diesen Filter vorhanden.</td></tr>
+        {% else %}
+        {% for a in audits %}
+        <tr class="selectable-row"
+            data-row
+            data-title="{{ a.audit_code }} · {{ a.title }}"
+            data-drawer-url="/audits/{{ a.id }}/drawer">
+          <td><a href="/audits/{{ a.id }}" class="code-pill">{{ a.audit_code }}</a></td>
+          <td><a href="/audits/{{ a.id }}"><strong>{{ a.title }}</strong></a></td>
+          <td>{{ a.auditor_name }}</td>
+          <td><span class="code-pill">{{ a.audit_date_label }}</span></td>
+          <td><span class="badge {{ a.status_css }}">{{ a.status_label }}</span></td>
+          <td>{{ a.open_findings_count }}</td>
+          <td>
+            {% if a.has_report %}
+            <a class="btn btn-sm" href="/audits/{{ a.id }}/report">PDF</a>
+            {% else %}
+            <span class="muted">–</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <h2 style="margin: 0; font-size: 15px;">Audit-Feststellungen &amp; Abweichungen</h2>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Audit</th>
+          <th>Finding</th>
+          <th>Typ</th>
+          <th>Control</th>
+          <th>Einheit</th>
+          <th>Status</th>
+          <th>Beschreibung</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if findings.is_empty() %}
+        <tr><td colspan="7" class="muted">Keine Feststellungen für diesen Filter vorhanden.</td></tr>
+        {% else %}
+        {% for f in findings %}
+        <tr>
+          <td><a href="/audits/{{ f.audit_id }}" class="code-pill">{{ f.audit_code }}</a></td>
+          <td><span class="code-pill">{{ f.finding_code }}</span></td>
+          <td><span class="badge {{ f.finding_type_css }}">{{ f.finding_type_label }}</span></td>
+          <td><span class="code-pill">{{ f.control_code }}</span></td>
+          <td>{{ f.unit_name }}</td>
+          <td><span class="badge {{ f.status_css }}">{{ f.status_label }}</span></td>
+          <td>{{ f.description }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

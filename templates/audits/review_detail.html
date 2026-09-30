@@ -1,0 +1,87 @@
+<div class="page-header">
+  <div>
+    <div class="toolbar-group" style="margin-bottom: 0.25rem;">
+      <span class="badge {{ status_css }}">{{ status_label }}</span>
+      <span class="code-pill">{{ review_date_label }}</span>
+    </div>
+    <h1 class="page-title">Management-Bewertung · {{ period_label }}</h1>
+    <p class="page-subtitle">
+      KPI-Snapshot vom <span class="code-pill">{{ kpi.generated_at }}</span>
+      {% if is_approved %} · Freigegeben durch {{ approved_by_label }} ({{ approved_at_label }}){% endif %}
+    </p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/management-reviews">Zurück zur Übersicht</a>
+    <a class="btn btn-sm" href="/management-reviews/{{ id }}/export.pdf">Protokoll als PDF</a>
+    {% if can_manage && !is_approved %}
+    <form method="post" action="/management-reviews/{{ id }}/refresh-kpis" hx-post="/management-reviews/{{ id }}/refresh-kpis" class="inline-form">
+      <button type="submit" class="btn btn-sm">Kennzahlen aktualisieren</button>
+    </form>
+    <form method="post" action="/management-reviews/{{ id }}/approve" hx-post="/management-reviews/{{ id }}/approve" class="inline-form">
+      <button type="submit" class="btn btn-primary btn-sm">Freigeben &amp; Snapshot einfrieren</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<section class="kpi-grid" aria-label="ISO 9.3 Kennzahlen" style="margin-bottom: 1.5rem;">
+  <div class="card">
+    <div class="kpi-label">SoA &amp; Controls</div>
+    <div class="kpi-value">{{ kpi.soa.implementation_percent }} %</div>
+    <div class="kpi-meta">{{ kpi.soa.implemented_count }} / {{ kpi.soa.applicable_count }} umgesetzt · {{ kpi.soa.open_gaps_count }} Lücken</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Risikoprofil</div>
+    <div class="kpi-value">{{ kpi.risks.critical_count }} / {{ kpi.risks.high_count }}</div>
+    <div class="kpi-meta">Kritisch / Hoch · Mittel: {{ kpi.risks.medium_count }} · Niedrig: {{ kpi.risks.low_count }} · Unakzeptiert: {{ kpi.risks.unaccepted_high_critical }}</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Vorfälle &amp; NIS2</div>
+    <div class="kpi-value">{{ kpi.incidents.total_count }} / {{ kpi.incidents.nis2_significant_count }}</div>
+    <div class="kpi-meta">Fristgerecht: {{ kpi.incidents.timely_bsi_reports }} · Überfällig: {{ kpi.incidents.overdue_bsi_reports }}</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Dokumente &amp; Audits</div>
+    <div class="kpi-value">{{ kpi.documents.approved_ratio_percent }} %</div>
+    <div class="kpi-meta">
+      {{ kpi.documents.approved_documents }}/{{ kpi.documents.total_documents }} freigegeben · Review fällig: {{ kpi.documents.overdue_reviews }} · Lesequote: {{ kpi.documents.acknowledgment_rate_percent }} %<br>
+      Offene Findings: {{ kpi.audits_and_actions.open_major_nc }} Major / {{ kpi.audits_and_actions.open_minor_nc }} Minor · Maßnahmen offen: {{ kpi.audits_and_actions.open_actions }}
+    </div>
+  </div>
+</section>
+
+<div class="card" style="max-width: 820px;">
+  <h2 style="margin: 0 0 0.75rem; font-size: 15px;">Protokoll &amp; Beschlüsse der Geschäftsführung</h2>
+  {% if can_manage && !is_approved %}
+  <form method="post" action="/management-reviews/{{ id }}" hx-post="/management-reviews/{{ id }}" class="form-grid">
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="mr-ed-period">Berichtszeitraum</label>
+        <input id="mr-ed-period" name="period_label" class="input" required maxlength="64" value="{{ period_label }}">
+      </div>
+      <div class="form-field">
+        <label class="label" for="mr-ed-date">Bewertungsdatum</label>
+        <input id="mr-ed-date" name="review_date" type="date" class="input" required value="{{ review_date_input }}">
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="label" for="mr-ed-part">Teilnehmerkreis</label>
+      <textarea id="mr-ed-part" name="participants" class="textarea" required>{{ participants }}</textarea>
+    </div>
+    <div class="form-field">
+      <label class="label" for="mr-ed-dec">Beschlüsse der Geschäftsführung</label>
+      <textarea id="mr-ed-dec" name="management_decisions" class="textarea textarea-lg">{{ management_decisions }}</textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Entwurf speichern</button>
+    </div>
+  </form>
+  {% else %}
+  <dl class="drawer-meta">
+    <dt>Teilnehmerkreis</dt>
+    <dd>{{ participants }}</dd>
+    <dt>Beschlüsse</dt>
+    <dd style="white-space: pre-wrap;">{% if management_decisions.is_empty() %}Keine gesonderten Beschlüsse protokolliert.{% else %}{{ management_decisions }}{% endif %}</dd>
+  </dl>
+  {% endif %}
+</div>

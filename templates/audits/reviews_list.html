@@ -1,0 +1,62 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Management-Bewertungen (ISO 9.3)</h1>
+    <p class="page-subtitle">Periodische Bewertung des ISMS durch die Geschäftsführung mit eingefrorenem KPI-Snapshot</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/audits">Interne Audits (ISO 9.2)</a>
+    {% if can_manage %}
+    <a class="btn btn-primary btn-sm" href="/management-reviews/new">+ Neue Management-Bewertung</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if only_approved_visible %}
+<div class="card" style="margin-bottom: 1rem;">
+  <p class="muted" style="margin: 0; font-size: 13px;">
+    Sie sehen ausschließlich formell freigegebene Management-Bewertungen.
+  </p>
+</div>
+{% endif %}
+
+<section class="table-card">
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Zeitraum</th>
+          <th>Datum</th>
+          <th>Teilnehmer</th>
+          <th>SoA-Umsetzung</th>
+          <th>Offene NCs</th>
+          <th>Status</th>
+          <th>Freigabe</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if reviews.is_empty() %}
+        <tr><td colspan="8" class="muted">Noch keine Management-Bewertungen vorhanden.</td></tr>
+        {% else %}
+        {% for r in reviews %}
+        <tr>
+          <td><a href="/management-reviews/{{ r.id }}"><strong>{{ r.period_label }}</strong></a></td>
+          <td><span class="code-pill">{{ r.review_date_label }}</span></td>
+          <td>{{ r.participants }}</td>
+          <td>{{ r.soa_percent }}</td>
+          <td>{{ r.open_nc_count }}</td>
+          <td><span class="badge {{ r.status_css }}">{{ r.status_label }}</span></td>
+          <td>{{ r.approved_label }}</td>
+          <td>
+            <div class="toolbar-group" style="gap: 0.35rem;">
+              <a class="btn btn-sm" href="/management-reviews/{{ r.id }}">Öffnen</a>
+              <a class="btn btn-sm" href="/management-reviews/{{ r.id }}/export.pdf">PDF</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

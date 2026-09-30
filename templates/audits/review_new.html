@@ -1,0 +1,58 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Neue Management-Bewertung (ISO 9.3)</h1>
+    <p class="page-subtitle">Live-Vorschau der aktuellen ISMS-Kennzahlen (Snapshot wird bei Anlage gespeichert)</p>
+  </div>
+  <div class="toolbar-group">
+    <a class="btn btn-sm" href="/management-reviews">Zurück zur Übersicht</a>
+  </div>
+</div>
+
+<section class="kpi-grid" aria-label="Live-Kennzahlen" style="margin-bottom: 1.5rem;">
+  <div class="card">
+    <div class="kpi-label">SoA-Umsetzungsgrad</div>
+    <div class="kpi-value">{{ kpi.soa.implementation_percent }} %</div>
+    <div class="kpi-meta">{{ kpi.soa.implemented_count }} / {{ kpi.soa.applicable_count }} Controls · {{ kpi.soa.open_gaps_count }} Lücken</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Risikoprofil</div>
+    <div class="kpi-value">{{ kpi.risks.critical_count }} / {{ kpi.risks.high_count }}</div>
+    <div class="kpi-meta">Kritisch / Hoch ({{ kpi.risks.total_count }} gesamt) · {{ kpi.risks.unaccepted_high_critical }} unakzeptiert</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Vorfälle &amp; NIS2</div>
+    <div class="kpi-value">{{ kpi.incidents.total_count }} / {{ kpi.incidents.nis2_significant_count }}</div>
+    <div class="kpi-meta">{{ kpi.incidents.timely_bsi_reports }} fristgerecht · {{ kpi.incidents.overdue_bsi_reports }} überfällig</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Dokumente &amp; Audits</div>
+    <div class="kpi-value">{{ kpi.documents.approved_ratio_percent }} %</div>
+    <div class="kpi-meta">{{ kpi.documents.approved_documents }}/{{ kpi.documents.total_documents }} Docs · {{ kpi.audits_and_actions.open_major_nc }} Major / {{ kpi.audits_and_actions.open_minor_nc }} Minor NC</div>
+  </div>
+</section>
+
+<div class="card" style="max-width: 780px;">
+  <form method="post" action="/management-reviews" hx-post="/management-reviews" class="form-grid">
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="mr-period">Berichtszeitraum</label>
+        <input id="mr-period" name="period_label" class="input" required maxlength="64" value="{{ default_period }}">
+      </div>
+      <div class="form-field">
+        <label class="label" for="mr-date">Bewertungsdatum</label>
+        <input id="mr-date" name="review_date" type="date" class="input" required value="{{ default_date }}">
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="label" for="mr-part">Teilnehmerkreis (Geschäftsführung, ISB, Fachbereiche)</label>
+      <textarea id="mr-part" name="participants" class="textarea" required placeholder="z. B. Geschäftsführung (A. Schmidt), ISB (M. Weber), IT-Leitung"></textarea>
+    </div>
+    <div class="form-field">
+      <label class="label" for="mr-dec">Beschlüsse der Geschäftsführung (Ressourcen, Scope, Verbesserungsziele)</label>
+      <textarea id="mr-dec" name="management_decisions" class="textarea textarea-lg"></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Entwurf mit KPI-Snapshot anlegen</button>
+    </div>
+  </form>
+</div>
