@@ -1,0 +1,86 @@
+<form method="post" action="/actions" hx-post="/actions" class="form-grid">
+  <input type="hidden" name="linked_risk_id" value="{{ linked_risk_id }}">
+  <input type="hidden" name="linked_soa_entry_id" value="{{ linked_soa_entry_id }}">
+  <input type="hidden" name="linked_audit_finding_id" value="{{ linked_audit_finding_id }}">
+  <input type="hidden" name="linked_incident_id" value="{{ linked_incident_id }}">
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="act-code">Code (optional, sonst automatisch)</label>
+      <input id="act-code" name="reference_code" class="input" maxlength="32" placeholder="z. B. ACT-001">
+    </div>
+    <div class="form-field">
+      <label class="label" for="act-source">Quelltyp</label>
+      <select id="act-source" name="source_type" class="select">
+        <option value="general" {% if default_source_type == "general" %}selected{% endif %}>Allgemein</option>
+        <option value="risk_treatment" {% if default_source_type == "risk_treatment" %}selected{% endif %}>Risikobehandlung</option>
+        <option value="soa_gap" {% if default_source_type == "soa_gap" %}selected{% endif %}>SoA-Lücke</option>
+        <option value="audit_finding" {% if default_source_type == "audit_finding" %}selected{% endif %}>Audit-Abweichung</option>
+        <option value="incident_capa" {% if default_source_type == "incident_capa" %}selected{% endif %}>Vorfalls-CAPA</option>
+        <option value="recurring_compliance" {% if default_source_type == "recurring_compliance" %}selected{% endif %}>Routineaufgabe</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="act-title">Titel der Maßnahme</label>
+    <input id="act-title" name="title" class="input" required maxlength="255" placeholder="z. B. Quartalsweiser Backup-Restore-Test">
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="act-desc">Beschreibung / Umsetzungsschritte</label>
+    <textarea id="act-desc" name="description" class="textarea"></textarea>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="act-prio">Priorität</label>
+      <select id="act-prio" name="priority" class="select">
+        <option value="low">Niedrig</option>
+        <option value="medium" selected>Mittel</option>
+        <option value="high">Hoch</option>
+        <option value="critical">Kritisch</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="act-due">Fälligkeitsdatum</label>
+      <input id="act-due" name="due_date" type="date" class="input" value="{{ default_due_date }}">
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-field">
+      <label class="label" for="act-user">Verantwortliche Person</label>
+      <select id="act-user" name="assignee_user_id" class="select">
+        <option value="">— Nicht zugewiesen —</option>
+        {% for u in users %}
+        <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="label" for="act-unit">Organisationseinheit</label>
+      <select id="act-unit" name="owner_unit_id" class="select">
+        <option value="">— Keine Einheit —</option>
+        {% for u in units %}
+        <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label class="label" for="act-rec">Wiederholungsintervall (Compliance-Kalender)</label>
+    <select id="act-rec" name="recurrence_interval" class="select">
+      <option value="">Einmalig (keine Wiederholung)</option>
+      <option value="monthly">Monatlich</option>
+      <option value="quarterly">Quartalsweise</option>
+      <option value="semi_annually">Halbjährlich</option>
+      <option value="annually">Jährlich</option>
+    </select>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Maßnahme anlegen</button>
+  </div>
+</form>

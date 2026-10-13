@@ -1,0 +1,147 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Maßnahmen, CAPA &amp; Compliance-Kalender</h1>
+    <p class="page-subtitle">ISO/IEC 27001 Kap. 6.2 &amp; 10.2 · {{ open_count }} offen · {{ overdue_count }} überfällig · {{ review_count }} in Prüfung</p>
+  </div>
+  <div class="toolbar-group">
+    {% if can_create %}
+    <button type="button" class="btn btn-primary btn-sm" data-shortcut="c"
+            hx-get="/actions/new" hx-target="#drawer-body">+ Neue Maßnahme <kbd>c</kbd></button>
+    {% endif %}
+  </div>
+</div>
+
+{% if is_employee %}
+<div class="card" style="margin-bottom: 1rem;">
+  <p class="muted" style="margin: 0; font-size: 13px;">
+    Sie sehen hier ausschließlich direkt Ihnen zugewiesene Aufgaben (Lesezugriff).
+  </p>
+</div>
+{% endif %}
+
+<section class="table-card">
+  <div class="toolbar" style="flex-wrap: wrap; gap: 0.75rem;">
+    <div class="toolbar-group" style="flex-wrap: wrap;">
+      <a class="btn btn-sm {% if active_filter.is_empty() %}btn-primary{% endif %}"
+         href="/actions" hx-get="/actions" hx-target="#main-content" hx-push-url="true">Alle</a>
+      <a class="btn btn-sm {% if active_filter == "mine" %}btn-primary{% endif %}"
+         href="/actions?filter=mine" hx-get="/actions?filter=mine" hx-target="#main-content" hx-push-url="true">Meine Aufgaben</a>
+      <a class="btn btn-sm {% if active_filter == "overdue" %}btn-primary{% endif %}"
+         href="/actions?filter=overdue" hx-get="/actions?filter=overdue" hx-target="#main-content" hx-push-url="true">Überfällig ({{ overdue_count }})</a>
+      <a class="btn btn-sm {% if active_filter == "open" %}btn-primary{% endif %}"
+         href="/actions?filter=open" hx-get="/actions?filter=open" hx-target="#main-content" hx-push-url="true">Offen</a>
+      <a class="btn btn-sm {% if active_filter == "review" %}btn-primary{% endif %}"
+         href="/actions?filter=review" hx-get="/actions?filter=review" hx-target="#main-content" hx-push-url="true">In Prüfung</a>
+      <a class="btn btn-sm {% if active_filter == "recurring" %}btn-primary{% endif %}"
+         href="/actions?filter=recurring" hx-get="/actions?filter=recurring" hx-target="#main-content" hx-push-url="true">Wiederkehrend</a>
+      <a class="btn btn-sm {% if active_filter == "done" %}btn-primary{% endif %}"
+         href="/actions?filter=done" hx-get="/actions?filter=done" hx-target="#main-content" hx-push-url="true">Erledigt</a>
+    </div>
+
+    <form method="get" action="/actions" class="toolbar-group"
+          hx-get="/actions" hx-target="#main-content" hx-push-url="true">
+      <input type="hidden" name="filter" value="{{ active_filter }}">
+      <select name="source_type" class="select">
+        <option value="">Alle Quellen</option>
+        <option value="risk_treatment" {% if filter_source_type == "risk_treatment" %}selected{% endif %}>Risikobehandlung</option>
+        <option value="soa_gap" {% if filter_source_type == "soa_gap" %}selected{% endif %}>SoA-Lücke</option>
+        <option value="audit_finding" {% if filter_source_type == "audit_finding" %}selected{% endif %}>Audit-Abweichung</option>
+        <option value="incident_capa" {% if filter_source_type == "incident_capa" %}selected{% endif %}>Vorfalls-CAPA</option>
+        <option value="recurring_compliance" {% if filter_source_type == "recurring_compliance" %}selected{% endif %}>Routineaufgabe</option>
+        <option value="general" {% if filter_source_type == "general" %}selected{% endif %}>Allgemein</option>
+      </select>
+      <select name="priority" class="select">
+        <option value="">Alle Prioritäten</option>
+        <option value="critical" {% if filter_priority == "critical" %}selected{% endif %}>Kritisch</option>
+        <option value="high" {% if filter_priority == "high" %}selected{% endif %}>Hoch</option>
+        <option value="medium" {% if filter_priority == "medium" %}selected{% endif %}>Mittel</option>
+        <option value="low" {% if filter_priority == "low" %}selected{% endif %}>Niedrig</option>
+      </select>
+      <input class="input" type="search" name="q" value="{{ filter_q }}" placeholder="Code oder Titel suchen…">
+      <button type="submit" class="btn btn-sm">Filtern</button>
+    </form>
+
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>s</kbd> Status</span>
+      <span><kbd>a</kbd> Zuweisen</span>
+      <span><kbd>Enter</kbd> Details</span>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Maßnahme</th>
+          <th>Quelle</th>
+          <th>Priorität</th>
+          <th>Status</th>
+          <th>Fälligkeit</th>
+          <th>Zuständig</th>
+          {% if can_edit_any %}
+          <th>Aktion</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% if actions.is_empty() %}
+        <tr><td colspan="8" class="muted">Keine Maßnahmen für diesen Filter vorhanden.</td></tr>
+        {% else %}
+        {% for a in actions %}
+        <tr class="selectable-row"
+            data-row
+            data-title="{{ a.reference_code }} · {{ a.title }}"
+            data-drawer-url="/actions/{{ a.id }}/drawer">
+          <td><span class="code-pill">{{ a.reference_code }}</span></td>
+          <td>
+            <strong>{{ a.title }}</strong>
+            {% if !a.recurrence_label.is_empty() %}
+            <span class="badge badge-info" style="margin-left: 0.35rem;">{{ a.recurrence_label }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="muted" style="font-size: 12px;">{{ a.source_type_label }}</span>
+            {% if !a.source_ref_label.is_empty() %}
+            <div><a href="{{ a.source_ref_href }}" class="code-pill">{{ a.source_ref_label }}</a></div>
+            {% endif %}
+          </td>
+          <td><span class="badge {{ a.priority_css }}">{{ a.priority_label }}</span></td>
+          <td><span class="badge {{ a.status_css }}">{{ a.status_label }}</span></td>
+          <td>
+            <span class="code-pill">{{ a.due_date_label }}</span>
+            {% if a.is_overdue %}
+            <span class="badge badge-critical" style="margin-left: 0.25rem;">Überfällig</span>
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ a.assignee_name }}</div>
+            <div class="muted" style="font-size: 12px;">{{ a.unit_name }}</div>
+          </td>
+          {% if can_edit_any %}
+          <td>
+            <div class="toolbar-group" style="gap: 0.25rem;">
+              {% if a.needs_verification_modal %}
+              <button type="button" class="btn btn-sm" data-shortcut="s"
+                      hx-get="/actions/{{ a.id }}/verify-modal"
+                      hx-target="#drawer-body">Wirksamkeit <kbd>s</kbd></button>
+              {% else %}
+              <form method="post" action="/actions/{{ a.id }}/status" hx-post="/actions/{{ a.id }}/status" class="inline-form">
+                <input type="hidden" name="status" value="{{ a.next_status_str }}">
+                <button type="submit" class="btn btn-sm" data-shortcut="s">Status <kbd>s</kbd></button>
+              </form>
+              {% endif %}
+              <button type="button" class="btn btn-sm" data-shortcut="a"
+                      hx-get="/actions/{{ a.id }}/drawer"
+                      hx-target="#drawer-body">Zuweisen <kbd>a</kbd></button>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

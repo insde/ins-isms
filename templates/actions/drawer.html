@@ -1,0 +1,122 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ reference_code }}</span>
+    <span class="badge {{ priority_css }}">{{ priority_label }}</span>
+    <span class="badge {{ status_css }}">{{ status_label }}</span>
+    {% if is_overdue %}
+    <span class="badge badge-critical">Überfällig</span>
+    {% endif %}
+  </div>
+  <h3 style="margin: 0.25rem 0;">{{ title }}</h3>
+  <p class="muted" style="margin: 0; font-size: 13px;">
+    Typ: {{ source_type_label }}
+    {% if !source_ref_label.is_empty() %}
+    · Quelle: <a href="{{ source_ref_href }}" class="code-pill">{{ source_ref_label }}</a>
+    {% endif %}
+  </p>
+</div>
+
+<div class="drawer-section">
+  <dl class="drawer-meta">
+    <dt>Zuständig</dt>
+    <dd>{{ assignee_name }} ({{ unit_name }})</dd>
+    <dt>Fälligkeit</dt>
+    <dd><span class="code-pill">{{ due_date_label }}</span></dd>
+    <dt>Wiederholung</dt>
+    <dd>{{ recurrence_label }}{% if recurrence_next_generated %} (Folgeaufgabe erzeugt){% endif %}</dd>
+    {% if !verified_info.is_empty() %}
+    <dt>Abschluss / Prüfung</dt>
+    <dd>{{ verified_info }}</dd>
+    {% endif %}
+  </dl>
+</div>
+
+{% if can_edit %}
+<div class="drawer-section">
+  <h4>Bearbeiten &amp; Wirksamkeitsprüfung</h4>
+  <form method="post" action="/actions/{{ id }}" hx-post="/actions/{{ id }}" class="form-grid">
+    <div class="form-field">
+      <label class="label" for="d-act-title">Titel</label>
+      <input id="d-act-title" name="title" class="input" required maxlength="255" value="{{ title }}">
+    </div>
+    <div class="form-field">
+      <label class="label" for="d-act-desc">Beschreibung</label>
+      <textarea id="d-act-desc" name="description" class="textarea">{{ description }}</textarea>
+    </div>
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-act-prio">Priorität</label>
+        <select id="d-act-prio" name="priority" class="select">
+          <option value="low" {% if priority_str == "low" %}selected{% endif %}>Niedrig</option>
+          <option value="medium" {% if priority_str == "medium" %}selected{% endif %}>Mittel</option>
+          <option value="high" {% if priority_str == "high" %}selected{% endif %}>Hoch</option>
+          <option value="critical" {% if priority_str == "critical" %}selected{% endif %}>Kritisch</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-act-status">Status</label>
+        <select id="d-act-status" name="status" class="select">
+          <option value="open" {% if status_str == "open" %}selected{% endif %}>Offen</option>
+          <option value="in_progress" {% if status_str == "in_progress" %}selected{% endif %}>In Bearbeitung</option>
+          <option value="review" {% if status_str == "review" %}selected{% endif %}>In Prüfung</option>
+          {% if can_verify_iso102 || status_str == "done" %}
+          <option value="done" {% if status_str == "done" %}selected{% endif %}>Erledigt</option>
+          {% endif %}
+          <option value="cancelled" {% if status_str == "cancelled" %}selected{% endif %}>Verworfen</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-act-due">Fälligkeitsdatum</label>
+        <input id="d-act-due" name="due_date" type="date" class="input" value="{{ due_date_value }}">
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-act-rec">Wiederholung</label>
+        <select id="d-act-rec" name="recurrence_interval" class="select">
+          <option value="" {% if recurrence_str.is_empty() %}selected{% endif %}>Einmalig</option>
+          <option value="monthly" {% if recurrence_str == "monthly" %}selected{% endif %}>Monatlich</option>
+          <option value="quarterly" {% if recurrence_str == "quarterly" %}selected{% endif %}>Quartalsweise</option>
+          <option value="semi_annually" {% if recurrence_str == "semi_annually" %}selected{% endif %}>Halbjährlich</option>
+          <option value="annually" {% if recurrence_str == "annually" %}selected{% endif %}>Jährlich</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-field">
+        <label class="label" for="d-act-user">Verantwortliche Person</label>
+        <select id="d-act-user" name="assignee_user_id" class="select">
+          <option value="">— Nicht zugewiesen —</option>
+          {% for u in users %}
+          <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="label" for="d-act-unit">Organisationseinheit</label>
+        <select id="d-act-unit" name="owner_unit_id" class="select">
+          <option value="">— Keine Einheit —</option>
+          {% for u in units %}
+          <option value="{{ u.id }}" {% if u.selected %}selected{% endif %}>{{ u.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="label" for="d-act-ver">Wirksamkeitsnachweis (Pflicht bei CAPA-Abschluss nach ISO 10.2)</label>
+      <textarea id="d-act-ver" name="verification_note" class="textarea">{{ verification_note }}</textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Änderungen speichern</button>
+    </div>
+  </form>
+</div>
+{% else %}
+<div class="drawer-section">
+  <h4>Beschreibung &amp; Nachweis</h4>
+  <p style="font-size: 13px;">{% if description.is_empty() %}Keine Beschreibung hinterlegt.{% else %}{{ description }}{% endif %}</p>
+  {% if !verification_note.is_empty() %}
+  <p style="font-size: 13px;"><strong>Wirksamkeitsnachweis:</strong> {{ verification_note }}</p>
+  {% endif %}
+</div>
+{% endif %}

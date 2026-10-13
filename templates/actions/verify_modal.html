@@ -1,0 +1,20 @@
+<div class="drawer-section">
+  <div class="toolbar-group" style="margin-bottom: 0.5rem;">
+    <span class="code-pill">{{ reference_code }}</span>
+    <span class="badge badge-warn">{{ source_type_label }}</span>
+  </div>
+  <h3 style="margin: 0.25rem 0;">Wirksamkeitsprüfung (ISO 10.2)</h3>
+  <p class="muted" style="margin: 0; font-size: 13px;">{{ title }}</p>
+</div>
+
+<form method="post" action="/actions/{{ id }}/status" hx-post="/actions/{{ id }}/status" class="form-grid">
+  <input type="hidden" name="status" value="done">
+  <div class="form-field">
+    <label class="label" for="ver-note">Nachweis der Wirksamkeit (Pflichtfeld)</label>
+    <textarea id="ver-note" name="verification_note" class="textarea" required
+              placeholder="Wie wurde die Wirksamkeit der Korrekturmaßnahme geprüft?">{{ verification_note }}</textarea>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Wirksamkeit bestätigen &amp; abschließen</button>
+  </div>
+</form>
