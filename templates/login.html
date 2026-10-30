@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anmeldung · ins-isms</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/keyboard.js" defer></script>
+</head>
+<body>
+<main class="login-shell">
+  <section class="login-card" aria-label="Anmeldung">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>
+      </span>
+      <span>ins-isms</span>
+    </div>
+    <div>
+      <h1 class="login-title">Anmeldung am ISMS</h1>
+      <p class="login-sub">ISO/IEC 27001:2022 &amp; NIS2 Compliance-Plattform</p>
+    </div>
+
+    {% if has_error %}
+    <div class="alert alert-error" role="alert">Anmeldung fehlgeschlagen. Bitte Zugangsdaten prüfen.</div>
+    {% endif %}
+
+    <form method="post" action="/login" class="stack-md">
+      <div class="form-group">
+        <label class="form-label" for="email">E-Mail-Adresse</label>
+        <input class="input" id="email" name="email" type="email" required autocomplete="username" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Passwort</label>
+        <input class="input" id="password" name="password" type="password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary">Anmelden</button>
+    </form>
+
+    {% if has_oidc %}
+    <div class="drawer-section">
+      <a class="btn" href="/auth/oidc/login">Mit Single Sign-On (OIDC) anmelden</a>
+    </div>
+    {% endif %}
+  </section>
+</main>
+</body>
+</html>

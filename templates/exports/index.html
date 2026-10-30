@@ -1,0 +1,173 @@
+<div class="page-header">
+  <div>
+    <h1>Exporte &amp; Import</h1>
+    <p class="page-subtitle">Regelwerkskataloge übernehmen, Stammdaten per CSV einlesen und Nachweispakete exportieren.</p>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="card kpi-card">
+    <span class="kpi-label">Aktive Frameworks</span>
+    <strong class="kpi-value">{{ frameworks_count }}</strong>
+    <span class="kpi-meta">{{ controls_count }} Controls im SoA</span>
+  </div>
+  <div class="card kpi-card">
+    <span class="kpi-label">System-Assets</span>
+    <strong class="kpi-value">{{ system_assets_count }}</strong>
+    <span class="kpi-meta">{{ info_assets_count }} Informationswerte</span>
+  </div>
+  <div class="card kpi-card">
+    <span class="kpi-label">Risikoszenarien</span>
+    <strong class="kpi-value">{{ risks_count }}</strong>
+    <span class="kpi-meta">Risikoregister</span>
+  </div>
+  <div class="card kpi-card">
+    <span class="kpi-label">Freigegebene Dokumente</span>
+    <strong class="kpi-value">{{ approved_docs_count }}</strong>
+    <span class="kpi-meta">Audit-relevante Richtlinien</span>
+  </div>
+</div>
+
+{% if can_import %}
+<div class="grid-2" style="margin-top:1.5rem; gap:1.25rem;">
+  <section class="card">
+    <h2>Framework-Katalog-Import (JSON / YAML)</h2>
+    <p class="muted">Importiert eigene oder lizenzierte Regelwerke (z. B. BSI IT-Grundschutz). Bestehende SoA-Bewertungen, Begründungen und Nachweise bleiben unberührt.</p>
+    <form hx-post="/exports/import/catalog"
+          hx-encoding="multipart/form-data"
+          hx-target="#catalog-import-result"
+          hx-swap="innerHTML">
+      <div class="form-row">
+        <label for="catalog-file">Katalogdatei (.json, .yaml, .yml)</label>
+        <input id="catalog-file" type="file" name="file" accept=".json,.yaml,.yml" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Katalog importieren</button>
+        <a class="btn" href="/exports/templates/example-catalog.json">Beispiel-Katalog (JSON)</a>
+      </div>
+    </form>
+    <div id="catalog-import-result" style="margin-top:1rem;"></div>
+  </section>
+
+  <section class="card">
+    <h2>Richtlinien-Import (Markdown)</h2>
+    <p class="muted">Importiert eine oder mehrere <code>.md</code>-Dateien (optional mit YAML-Frontmatter) als Entwurf. Freigegebene Versionen bleiben unberührt.</p>
+    <form hx-post="/exports/import/policy"
+          hx-encoding="multipart/form-data"
+          hx-target="#policy-import-result"
+          hx-swap="innerHTML">
+      <div class="form-row">
+        <label for="policy-files">Markdown-Richtlinie(n) (.md)</label>
+        <input id="policy-files" type="file" name="file" accept=".md,.markdown,text/markdown" multiple required>
+      </div>
+      <div class="form-grid" style="margin-top:0.5rem;">
+        <div class="form-row">
+          <label for="policy-doc-code">Dokument-ID (optional bei Einzeldatei)</label>
+          <input id="policy-doc-code" class="input" type="text" name="doc_code" maxlength="32" placeholder="z. B. POL-001">
+        </div>
+        <div class="form-row">
+          <label for="policy-title">Titel (optional)</label>
+          <input id="policy-title" class="input" type="text" name="title" maxlength="255" placeholder="Sonst aus # Überschrift">
+        </div>
+        <div class="form-row">
+          <label for="policy-doc-type">Dokumenttyp</label>
+          <select id="policy-doc-type" class="select" name="doc_type">
+            <option value="policy">Richtlinie (policy)</option>
+            <option value="guideline">Leitfaden (guideline)</option>
+            <option value="sop">Arbeitsanweisung (sop)</option>
+            <option value="record">Nachweis (record)</option>
+            <option value="template">Vorlage (template)</option>
+            <option value="runbook">Betriebshandbuch (runbook)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="policy-class-code">Schutzstufe</label>
+          <select id="policy-class-code" class="select" name="classification_code">
+            <option value="C2">C2 – Intern</option>
+            <option value="C1">C1 – Öffentlich</option>
+            <option value="C3">C3 – Vertraulich</option>
+            <option value="C4">C4 – Streng vertraulich</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:0.5rem;">
+        <label class="checkbox-label">
+          <input type="checkbox" name="requires_acknowledgment" value="true" checked>
+          Lesebestätigung durch Mitarbeitende erforderlich
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Richtlinie(n) importieren</button>
+      </div>
+    </form>
+    <div id="policy-import-result" style="margin-top:1rem;"></div>
+  </section>
+
+  <section class="card">
+    <h2>CSV-Bulk-Import (2-Stufen-Vorschau)</h2>
+    <p class="muted">Unterstützt UTF-8 (mit/ohne BOM) sowie Komma (<code>,</code>) und Semikolon (<code>;</code>). Im ersten Schritt wird jede Zeile ohne Speicherung validiert.</p>
+    <form hx-post="/exports/import/csv/preview"
+          hx-encoding="multipart/form-data"
+          hx-target="#csv-preview-result"
+          hx-swap="innerHTML">
+      <div class="form-row">
+        <label for="csv-entity-type">Ziel-Entität</label>
+        <select id="csv-entity-type" name="entity_type" required>
+          <option value="system_assets">System-Assets (asset_code, name, asset_type, criticality, …)</option>
+          <option value="information_assets">Informationswerte (name, classification_code, confidentiality, integrity, availability, …)</option>
+          <option value="risk_scenarios">Risikoszenarien (reference_code, title, threat_description, …)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="csv-file">CSV-Datei (.csv)</label>
+        <input id="csv-file" type="file" name="file" accept=".csv,text/csv" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Vorschau &amp; Validierung starten</button>
+      </div>
+    </form>
+    <div id="csv-preview-result" style="margin-top:1rem;"></div>
+  </section>
+</div>
+{% endif %}
+
+<section class="card" style="margin-top:1.5rem;">
+  <h2>Auditor-Exporte &amp; Datenportabilität</h2>
+  <p class="muted">Strukturierte Exporte für Zertifizierungsaudits und vollständige Datensouveränität.</p>
+  <div class="grid-3" style="margin-top:1rem; gap:1rem;">
+    <div class="card">
+      <h3>SoA &amp; Risikobehandlungsplan</h3>
+      <p class="muted">Direkte PDF- und CSV-Exporte der aktuellen Governance-Kernregister.</p>
+      <div class="btn-group">
+        <a class="btn btn-sm" href="/soa/export.pdf">SoA-PDF</a>
+        <a class="btn btn-sm" href="/soa/export.csv">SoA-CSV</a>
+        <a class="btn btn-sm" href="/risks/export.pdf">RTP-PDF</a>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Auditor-Evidence-Paket (ZIP)</h3>
+      <p class="muted">Gebündeltes Prüferpaket inklusive <code>00_MANIFEST.sha256</code>, freigegebenen Richtlinien, Nachweisen und Hash-Chain-Prüfbericht.</p>
+      <form method="get" action="/exports/auditor-package.zip">
+        {% if is_admin %}
+        <div class="form-row" style="margin-bottom:0.65rem;">
+          <label class="checkbox-label">
+            <input type="checkbox" name="include_ip" value="true">
+            IP-Adressen im Audit-Trail einschließen (nur Admin)
+          </label>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary btn-sm">Auditor-ZIP herunterladen</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Kompendium &amp; Portabilität</h3>
+      <p class="muted">Gesamt-Audit-Kompendium (PDF mit Querverweisen){% if is_admin %} sowie vollständiger Instanz-JSON-Export{% endif %}.</p>
+      <div class="btn-group">
+        <a class="btn btn-primary btn-sm" href="/exports/audit-compendium.pdf">Audit-Kompendium (PDF)</a>
+        {% if is_admin %}
+        <a class="btn btn-sm" href="/exports/full-backup.json">Instanz-Backup (JSON)</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>

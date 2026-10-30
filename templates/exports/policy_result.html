@@ -1,0 +1,25 @@
+<div class="alert alert-success">
+  <strong>Richtlinien-Import abgeschlossen ({{ items.len() }} Datei(en)):</strong>
+</div>
+<div class="table-scroll" style="margin-top:0.75rem;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Dokument-ID</th>
+        <th>Titel</th>
+        <th>Version</th>
+        <th>Ergebnis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td><code>{{ item.doc_code }}</code></td>
+        <td>{{ item.title }}</td>
+        <td><span class="badge">{{ item.version_number }}</span></td>
+        <td>{{ item.outcome }}<br><span class="muted">SHA-256: <code>{{ item.file_sha256 }}</code></span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

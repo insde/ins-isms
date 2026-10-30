@@ -1,0 +1,56 @@
+<dl class="drawer-meta">
+  <dt>Eintrag-ID</dt>
+  <dd><span class="code-pill">#{{ id }}</span></dd>
+  <dt>Zeitpunkt</dt>
+  <dd><span class="code-pill">{{ occurred_at_str }}</span></dd>
+  <dt>Benutzer</dt>
+  <dd>{{ actor_label }}</dd>
+  <dt>IP-Adresse</dt>
+  <dd>{{ actor_ip_display }}</dd>
+  <dt>Aktion</dt>
+  <dd><span class="badge badge-neutral">{{ action }}</span></dd>
+  <dt>Entität</dt>
+  <dd>{{ entity_type }}</dd>
+  <dt>Entitäts-ID</dt>
+  <dd><span class="code-pill">{{ entity_id }}</span></dd>
+  <dt>Zusammenfassung</dt>
+  <dd>{{ summary }}</dd>
+</dl>
+
+<div class="drawer-section">
+  <h4>Konkrete Änderungen (Vorher / Nachher)</h4>
+  {% if diff_fields.is_empty() %}
+  <p class="muted" style="margin:0; font-size:13px;">Keine Feldänderungen protokolliert (Ereignis- oder Sicherheitsprotokoll).</p>
+  {% else %}
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Feld</th>
+          <th>Vorher</th>
+          <th>Nachher</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in diff_fields %}
+        <tr>
+          <td><span class="code-pill">{{ item.field }}</span></td>
+          <td>{{ item.before }}</td>
+          <td><strong>{{ item.after }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="drawer-section">
+  <h4>Kryptografische Integrität (SHA-256 Hash-Chain)</h4>
+  <dl class="drawer-meta">
+    <dt>Prev-Hash</dt>
+    <dd><code style="font-size:12px; word-break:break-all;">{{ prev_hash }}</code></dd>
+    <dt>Row-Hash</dt>
+    <dd><code style="font-size:12px; word-break:break-all;">{{ row_hash }}</code></dd>
+  </dl>
+</div>

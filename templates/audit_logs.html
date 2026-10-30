@@ -1,0 +1,70 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Revisionssicheres Audit-Log</h1>
+    <p class="page-subtitle">Unveränderliche Append-Only-Historie mit kryptografischer SHA-256-Hash-Chain</p>
+  </div>
+  <div class="toolbar-group">
+    <button type="button" class="btn btn-primary" hx-get="/audit-logs/verify" hx-target="#audit-verify-result">
+      Hash-Chain verifizieren
+    </button>
+  </div>
+</div>
+
+<div id="audit-verify-result"></div>
+
+<section class="table-card">
+  <div class="toolbar">
+    <form method="get" action="/audit-logs" class="toolbar-group">
+      <input class="input" type="text" name="entity_type" value="{{ filter_entity_type }}" placeholder="Entität (z. B. users, system_assets)">
+      <input class="input" type="text" name="action" value="{{ filter_action }}" placeholder="Aktion (z. B. created, verified)">
+      <input class="input" type="text" name="actor" value="{{ filter_actor }}" placeholder="Benutzer / E-Mail">
+      <button type="submit" class="btn btn-sm">Filtern</button>
+      {% if !filter_entity_type.is_empty() || !filter_action.is_empty() || !filter_actor.is_empty() %}
+      <a class="btn btn-sm" href="/audit-logs">Zurücksetzen</a>
+      {% endif %}
+    </form>
+    <div class="kbd-hint-bar">
+      <span><kbd>j</kbd>/<kbd>k</kbd> Navigieren</span>
+      <span><kbd>Enter</kbd> Details</span>
+      <span class="muted" style="font-size:12px;">Letzte {{ entries.len() }} Einträge</span>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Zeitpunkt (UTC)</th>
+          <th>Aktion</th>
+          <th>Entität</th>
+          <th>Zusammenfassung</th>
+          <th>Benutzer</th>
+          <th>IP</th>
+          <th>Row-Hash</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if entries.is_empty() %}
+        <tr><td colspan="8" class="muted">Keine Audit-Einträge für diesen Filter gefunden.</td></tr>
+        {% else %}
+        {% for entry in entries %}
+        <tr class="selectable-row"
+            data-row
+            data-title="Audit #{{ entry.id }} · {{ entry.action }}"
+            data-drawer-url="/audit-logs/{{ entry.id }}">
+          <td>{{ entry.id }}</td>
+          <td><span class="code-pill">{{ entry.occurred_at_str }}</span></td>
+          <td><span class="badge badge-neutral">{{ entry.action }}</span></td>
+          <td>{{ entry.entity_type }}</td>
+          <td>{{ entry.summary }}</td>
+          <td>{{ entry.actor_label }}</td>
+          <td>{{ entry.actor_ip_display }}</td>
+          <td><span class="code-pill">{{ entry.short_hash }}…</span></td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>

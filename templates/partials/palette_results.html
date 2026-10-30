@@ -1,0 +1,12 @@
+{% if items.is_empty() %}
+<li class="palette-item"><span class="muted">Keine Treffer gefunden.</span></li>
+{% else %}
+{% for item in items %}
+<li class="palette-item">
+  <a href="{{ item.href }}">
+    <span>{{ item.label }}</span>
+    <span class="badge badge-neutral">{{ item.category }}</span>
+  </a>
+</li>
+{% endfor %}
+{% endif %}

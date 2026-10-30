@@ -1,0 +1,58 @@
+<div class="card" style="padding:1rem; border-color: var(--border-strong);">
+  <div class="page-header" style="margin-bottom:0.75rem;">
+    <div>
+      <strong>Vorschau: {{ entity_label }}</strong>
+      <span class="muted">· Trennzeichen: {{ delimiter_label }} · {{ total_rows }} Zeilen ({{ valid_count }} gültig, {{ error_count }} fehlerhaft)</span>
+    </div>
+    {% if valid_count > 0 %}
+    <form hx-post="/exports/import/csv/commit"
+          hx-target="#csv-preview-result"
+          hx-swap="innerHTML">
+      <input type="hidden" name="payload_json" value="{{ payload_json }}">
+      <input type="hidden" name="payload_hmac" value="{{ payload_hmac }}">
+      <button type="submit" class="btn btn-primary btn-sm">{{ valid_count }} gültige Zeilen importieren</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Zeile</th>
+          <th>Schlüssel</th>
+          <th>Bezeichnung</th>
+          <th>Status</th>
+          <th>Hinweise</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row.row_number }}</td>
+          <td><code>{{ row.key_label }}</code></td>
+          <td>{{ row.summary_label }}</td>
+          <td>
+            {% if row.is_valid %}
+            <span class="badge badge-approved">Gültig</span>
+            {% else %}
+            <span class="badge badge-danger">Fehler</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.errors.is_empty() %}
+            <span class="muted">Bereit für Import</span>
+            {% else %}
+            <ul style="margin:0; padding-left:1.1rem; color: var(--danger);">
+              {% for err in row.errors %}
+              <li>{{ err }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
