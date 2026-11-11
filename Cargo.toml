@@ -1,0 +1,54 @@
+[package]
+name = "ins-isms"
+version = "0.1.0"
+edition = "2024"
+description = "An opinionated Information Security Management System (ISMS) implementing ISO 27001:2022 and NIS2."
+authors = ["INS GmbH <info@ins.de>"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/insde/ins-isms"
+readme = "README.md"
+keywords = ["isms", "information-security", "compliance", "gpl"]
+categories = ["web-programming"]
+publish = false
+
+[dependencies]
+axum = { version = "0.8", features = ["multipart"] }
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "ipnetwork", "migrate"] }
+askama = "0.12"
+rust-embed = "8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yml = "0.0.12"
+csv = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+dotenvy = "0.15"
+argon2 = "0.5"
+base64 = "0.22"
+cookie = "0.18"
+hmac = "0.12"
+openidconnect = "4"
+rand = "0.9"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+sha2 = "0.10"
+hex = "0.4"
+subtle = "2"
+thiserror = "2"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.10"
+pulldown-cmark = "0.12"
+ammonia = "4"
+infer = "0.16"
+tempfile = "3"
+url = "2"
+lettre = { version = "0.11", default-features = false, features = ["tokio1-rustls-tls", "smtp-transport", "builder"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tokio = { version = "1", features = ["full", "test-util"] }
+tower = { version = "0.5", features = ["util"] }
