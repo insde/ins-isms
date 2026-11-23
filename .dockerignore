@@ -1,0 +1,13 @@
+target/
+.git/
+.gitignore
+data/
+.env
+.env.*
+!.env.example
+*.log
+*.bak
+*.tmp
+seeds/policies/
+seeds/*.json
+!seeds/example_pack/
