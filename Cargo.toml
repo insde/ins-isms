@@ -1,6 +1,6 @@
 [package]
 name = "ins-isms"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "An opinionated Information Security Management System (ISMS) implementing ISO 27001:2022 and NIS2."
 authors = ["INS GmbH <info@ins.de>"]
