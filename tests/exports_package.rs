@@ -284,7 +284,7 @@ async fn auditor_zip_verifies_manifest_excludes_drafts_and_scrubs_ip_unless_admi
         let mut entry = archive.by_index(i).unwrap();
         let mut buf = Vec::new();
         entry.read_to_end(&mut buf).unwrap();
-        unpacked.insert(entry.name().to_string(), buf);
+        unpacked.insert(entry.name().unwrap().into_owned(), buf);
     }
 
     let manifest_raw = String::from_utf8(unpacked.remove("00_MANIFEST.sha256").unwrap()).unwrap();
