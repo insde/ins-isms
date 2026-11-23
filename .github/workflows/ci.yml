@@ -1,0 +1,71 @@
+name: CI & Release Verification
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+  APP_ENV: development
+  DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/ins_isms_test
+  MIGRATION_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/ins_isms_test
+  SESSION_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+  APP_BASE_URL: http://127.0.0.1:8080
+
+jobs:
+  verify:
+    name: Format, Clippy, Offline Check & Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ins_isms_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies (Liberation fonts & Typst CLI)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-liberation xz-utils curl
+          TYPST_VERSION="0.13.1"
+          curl -fsSL "https://github.com{TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" -o /tmp/typst.tar.xz
+          tar -xf /tmp/typst.tar.xz -C /tmp
+          sudo mv "/tmp/typst-x86_64-unknown-linux-musl/typst" /usr/local/bin/typst
+          typst --version
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo registry & build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting (cargo fmt)
+        run: cargo fmt --check
+
+      - name: Run linter (cargo clippy)
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Verify offline compilation (SQLX_OFFLINE=true)
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo check --all-targets --locked
+
+      - name: Run full unit & PostgreSQL integration test suite
+        run: cargo test --locked
