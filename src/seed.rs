@@ -417,7 +417,7 @@ pub async fn seed_policies_from_dir_tx(
         let raw = std::fs::read_to_string(&path)?;
         let (frontmatter_yaml, body_markdown) = split_policy_frontmatter(&raw)?;
         let fm: PolicyFrontmatter = match frontmatter_yaml {
-            Some(yaml) => serde_yml::from_str(&yaml).map_err(|err| {
+            Some(yaml) => serde_yaml_ng::from_str(&yaml).map_err(|err| {
                 AppError::Internal(format!(
                     "Ungültiges YAML-Frontmatter in {}: {err}",
                     path.display()

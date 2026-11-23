@@ -118,7 +118,7 @@ fn parse_catalog_bytes(filename: &str, bytes: &[u8]) -> Result<CatalogImportPayl
 
     let lower_name = filename.to_ascii_lowercase();
     if lower_name.ends_with(".yaml") || lower_name.ends_with(".yml") {
-        serde_yml::from_str::<CatalogImportPayload>(text)
+        serde_yaml_ng::from_str::<CatalogImportPayload>(text)
             .map_err(|e| AppError::Validation(vec![format!("Ungültiges YAML-Katalogformat: {e}")]))
     } else if lower_name.ends_with(".json") {
         serde_json::from_str::<CatalogImportPayload>(text)
@@ -127,7 +127,7 @@ fn parse_catalog_bytes(filename: &str, bytes: &[u8]) -> Result<CatalogImportPayl
         serde_json::from_str::<CatalogImportPayload>(text)
             .map_err(|e| AppError::Validation(vec![format!("Ungültiges JSON-Katalogformat: {e}")]))
     } else {
-        serde_yml::from_str::<CatalogImportPayload>(text).map_err(|e| {
+        serde_yaml_ng::from_str::<CatalogImportPayload>(text).map_err(|e| {
             AppError::Validation(vec![format!(
                 "Ungültiges Katalogformat (erwartet JSON oder YAML): {e}"
             )])
