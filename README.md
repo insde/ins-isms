@@ -7,6 +7,7 @@
 
 ---
 
+
 ## License & Legal Notice
 
 This project is Free and Open-Source Software published by **INS GmbH** under the **GNU General Public License v3.0 (GPLv3)** – see the [LICENSE](./LICENSE) file for details.
