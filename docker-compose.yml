@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ins_isms
+      POSTGRES_PASSWORD: ins_isms_dev_password
+      POSTGRES_DB: ins_isms
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ins_isms -d ins_isms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: ghcr.io/insde/ins-isms:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: development
+      BIND_ADDR: 0.0.0.0:8080
+      APP_BASE_URL: http://localhost:8080
+      COOKIE_SECURE: "false"
+      DATABASE_URL: postgres://ins_isms:ins_isms_dev_password@db:5432/ins_isms
+      MIGRATION_DATABASE_URL: postgres://ins_isms:ins_isms_dev_password@db:5432/ins_isms
+      SESSION_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      STORAGE_BACKEND: local
+      STORAGE_LOCAL_PATH: /var/lib/ins-isms/blobs
+      INIT_ADMIN_EMAIL: admin@example.com
+      INIT_ADMIN_PASSWORD: Admin12345678!
+      SEED_STARTER_CONTENT: "true"
+      SEED_DIR: /app/seeds/example_pack
+    volumes:
+      - blob_data:/var/lib/ins-isms/blobs
+      - ./seeds/example_pack:/app/seeds/example_pack:ro
+
+volumes:
+  pg_data:
+  blob_data:
+
