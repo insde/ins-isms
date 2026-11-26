@@ -103,6 +103,21 @@ Ein Zertifizierungsauditor prüft im Kern nur **vier Dinge**:
 - **`Standort / Raum`:** Immer sinnvoll für Ihren **Hauptstandort** sowie besonders geschützte Bereiche wie **Serverraum**, **Archivraum** oder **Fertigungshalle** (deckt ISO 27001 Anhang A.7 physische Sicherheit ab).
 - **`Maschine / OT-Anlage`:** Nur relevant, wenn Sie Fertigungs-, Werkstatt-, Labor- oder Medizintechnik-Anlagen betreiben, die am Netzwerk hängen oder eigene Steuerungsrechner haben. Reine Bürobetriebe lassen diesen Typ einfach weg.
 
+### „Muss ich für ein Lieferantenaudit persönlich bei Microsoft, AWS oder unserem Steuerberater vorbeifahren?“
+- **Antwort:** **Nein.** Ein Lieferantenaudit bedeutet im KMU-Alltag fast nie eine Vor-Ort-Prüfung mit Checkliste beim Dienstleister.
+- **Pragmatische Lösung (3-Stufen-Modell):**
+  1. **Große Cloud- & SaaS-Anbieter (Microsoft,DATEV etc.):** Laden Sie einmal im Jahr das aktuelle **ISO-27001-Zertifikat** oder den **SOC-2-Bericht** aus deren Trust Center herunter, legen Sie es als Nachweis (`control_evidences`) ab und dokumentieren Sie kurz in einer Notiz, dass keine Auffälligkeiten vorliegen. Das gilt im Audit als vollwertige Lieferantenprüfung (`A.5.22`).
+  2. **IT-Systemhaus / Software-Dienstleister ohne eigene ISO-Zertifizierung:** Schicken Sie einen kurzen **10-Fragen-Sicherheitsbogen** (z. B. zu MFA, Backups, Admin-Zugriffen, Meldewegen) oder besprechen Sie die Punkte in einem 30-minütigen Jahresgespräch und halten das Ergebnis kurz schriftlich fest.
+  3. **Unkritische Lieferanten (Büromaterial, Reinigung ohne Serverraum-Zutritt):** Müssen überhaupt nicht auditiert werden, da sie keinen Zugriff auf Informationswerte (`C3`/`C4`) haben.
+
+### „Wie bewerte ich unseren Internet-Provider oder Upstream-Carrier im ISMS?“
+- **Antwort:** Carrier und Upstream-Provider werden als kritische Lieferanten (`vendor`) erfasst, aber **technisch über Redundanz und Verschlüsselung abgesichert**, statt sie per Fragebogen zu auditieren.
+- **Pragmatische Lösung:**
+  - **Nachweis (`A.5.22`):** Große Telekommunikationsanbieter unterliegen strengen gesetzlichen Vorgaben (TKG / BSI) und verfügen meist über ISO-27001-Zertifikate. Hinterlegen Sie einmal jährlich das Zertifikat und den SLA-Vertrag als Nachweis – ein Vor-Ort-Audit oder individueller Fragebogen ist nicht erforderlich.
+  - **Verfügbarkeit (`A.8.14`):** Sichern Sie geschäftskritische Leitungen (insbesondere Hosting-Uplinks) durch einen zweiten, unabhängigen Provider (Multi-Homing / LTE-Failover) und achten Sie auf getrennte physische Leitungswege.
+  - **Vertraulichkeit (`A.8.24`):** Betrachten Sie jedes öffentliche Transportnetz grundsätzlich als unsicher und erzwingen Sie durchgehende Transportverschlüsselung (TLS, VPN, SSH).
+
+
 ---
 
 ## Zu D: Basis-Richtlinien & Dokumentenlenkung
