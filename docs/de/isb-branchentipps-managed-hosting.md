@@ -57,8 +57,20 @@ Für Hosting-Anbieter schaut der Auditor besonders genau auf folgende ISO-27001-
 
 ---
 
-## 4. Audit-Tipp: Was Prüfer bei Hostern besonders gern fragen
-
+## 4. Audit-Tipp: Was Prüfer bei Hostern besonders gern fragen könnten
 * **„Wie stellen Sie sicher, dass Sie kein Kundensystem vergessen?“** → Zeigen Sie Ihr zentrales Monitoring, Asset-Inventar oder Konfigurationsmanagement (z. B. Ansible, Puppet, etc.) als Nachweis zu `A.5.9` und `A.8.8`.
-* **„Wo endet Ihre Pflicht und wo beginnt die Pflicht des Kunden?“** → Halten Sie eine klare **Verantwortlichkeitsmatrix (RACI)** bereit (z. B. *OS & PHP-Runtime = Hoster; individueller Kunden-Code / CMS-Plugins = Kunde, sofern kein Full-Managed-Vertrag besteht*).
-* **„Zeigen Sie mir einen Fall, bei dem es schnell gehen musste.“** → Halten Sie 1–2 gut dokumentierte Tickets (z. B. zur letzten großen PHP- oder OpenSSL-Lücke) griffbereit, an denen man *Erkennung → Inventarabgleich → Patch → IoC-Check → Kundeninfo* lückenlos nachvollziehen kann.
+* **„Zeigen Sie mir einen Fall, bei dem es schnell gehen musste.“** → Halten Sie 1–2 gut dokumentierte Tickets (z. B. zur letzten großen PHP-, Java- oder OpenSSL-Lücke) griffbereit, an denen man *Erkennung → Inventarabgleich → Patch → IoC-Check → Kundeninfo* lückenlos nachvollziehen kann.
+* **„Wo endet Ihre Pflicht und wo beginnt die Pflicht des Kunden?“** → Halten Sie eine klare **RACI-Matrix** (*Shared Responsibility*) bereit, die die Zuständigkeiten nach Technologie-Schicht abgrenzt:
+
+### Muster-RACI: Geteilte Verantwortung (Managed Hosting vs. Kunde)
+*(Legende: **R** = Durchführung, **A** = Gesamtverantwortung/Freigabe, **C** = Beratend, **I** = Informiert)*
+
+| Betrieblicher Prozess / Schicht | IT-Betrieb (Hoster) | ISB (Hoster) | Kunde (Auftraggeber) |
+| :--- | :---: | :---: | :---: |
+| **Physische Rechenzentrumssicherheit & Hardware** | **R / A** | **C** | **I** |
+| **Betriebssystem- & Laufzeit-Updates (z. B. Linux, PHP, Java)** | **R / A** | **C** | **I** |
+| **Individueller Anwendungscode & CMS-Plugins patchen** *(Standard-Hosting)* | **I** | **–** | **R / A** |
+| **Individueller Anwendungscode & CMS-Plugins patchen** *(Full-Managed)* | **R / A** | **C** | **I** |
+| **Notfall-Workarounds (z. B. WAF-Regeln) bei Zero-Days** | **R / A** | **C** | **I** |
+| **Kompromittierungsprüfung (IoC-Check) auf Plattformebene** | **R** | **A** | **I** |
+| **Behördenmeldung bei Datenschutzvorfall (DSGVO Art. 33)** | **C** | **C** | **R / A** *(Verantwortlicher)* |

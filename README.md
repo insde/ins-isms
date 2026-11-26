@@ -7,7 +7,6 @@
 
 ---
 
-
 ## License & Legal Notice
 
 This project is Free and Open-Source Software published by **INS GmbH** under the **GNU General Public License v3.0 (GPLv3)** – see the [LICENSE](./LICENSE) file for details.
@@ -20,6 +19,12 @@ While developed within a corporate context for internal use, the public distribu
 **No Warranty & No Obligation for Updates:**  
 The software is provided strictly **"AS IS"**, without warranty of any kind, express or implied. INS GmbH assumes no obligation to provide ongoing maintenance, bug fixes, or security updates to third-party users. Any third party deploying this software in their own organization or integrating it into commercial offerings does so entirely at their own risk and is solely responsible for ensuring compliance with applicable regulatory frameworks (including the EU Cyber Resilience Act, Product Liability regulations, and ISO 27001 or NIS2 requirements).
 
+### Standards, Trademarks & Content Notice
+- **No Copyrighted Standard Texts Included:** This repository does **not** contain copyrighted normative texts, control wording, or official translations from ISO, IEC, DIN, BSI, or other standardization bodies. All included control catalogs, policy templates (`POL-*`), and ISB guides are original, generic formulations based on publicly known industry best practices and statutory requirements (such as GDPR and German BSIG).
+- **Trademarks:** "ISO" and "IEC" are registered trademarks of the International Organization for Standardization and the International Electrotechnical Commission. Any reference to ISO/IEC 27001:2022 or NIS2 is solely for descriptive interoperability purposes and does not imply endorsement or certification by any standardization body or authority.
+- **No Legal or Audit Advice:** The included policy templates and guides are non-binding examples and do not constitute legal, regulatory, or auditing advice. Users must obtain official copies of applicable standards directly from the respective publishers and adapt all templates to their specific organizational and legal requirements.
+
 ## Security
 
 For information on how to report security vulnerabilities, please refer to our [Security Policy](./SECURITY.md).
+

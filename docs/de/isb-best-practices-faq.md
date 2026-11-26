@@ -57,6 +57,21 @@ Ein Zertifizierungsauditor prüft im Kern nur **vier Dinge**:
   - Halten Sie ein separates, zusätzliches **`admin`**-Konto nur für Systemkonfiguration und Benutzerverwaltung vor.
   - **Audit-Vorteil:** Das beweist sofort gelebte Funktionstrennung (*Segregation of Duties*) und sorgt im Audit-Log für klare Nachvollziehbarkeit.
 
+### „Wie grenze ich die Aufgaben zwischen Geschäftsführung, ISB, IT und Fachabteilungen sauber ab (RACI-Matrix)?“
+- **Warum das wichtig ist:** ISO 27001 (Kap. 5.3 & Control A.5.2) verlangt klare Verantwortlichkeiten. Mit einer kompakten **RACI-Matrix** verhindern Sie im Audit Diskussionen darüber, wer was freigibt oder umsetzt.
+- **Legende:** **R** = Responsible (Durchführung), **A** = Accountable (Gesamtverantwortung / Freigabe – *immer nur 1x pro Zeile!*), **C** = Consulted (Beratend einbezogen), **I** = Informed (Wird informiert).
+
+| ISMS-Aufgabe / Prozess | Geschäftsführung | ISB (`iso`) | IT-Admin (`admin`) | Fachbereich (`owner`) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Informationssicherheitsleitlinie (`POL-001`) freigeben** | **A** | **R** | **C** | **I** |
+| **IT-Systeme & Schutzstufen pflegen** | **I** | **C** | **R** | **A** |
+| **Risikobewertung & SoA erstellen / aktualisieren** | **A** | **R** | **C** | **C** |
+| **Hohe Restrisiken (`Score ≥ 10`) akzeptieren** | **A** | **R / C** | **I** | **C** |
+| **Technische Schutzmaßnahmen & Patches umsetzen** | **I** | **C** | **R / A** | **I** |
+| **Backup-Restore-Tests durchführen & dokumentieren** | **I** | **C** | **R / A** | **I** |
+| **Sicherheitsvorfälle bearbeiten & melden (DSGVO/NIS2)** | **A** | **R** | **R** | **C** |
+| **Internes Audit & Management-Bewertung durchführen** | **A** | **R** | **C** | **C** |
+
 ---
 
 ## Zu B: Schutzstufen & Informationswerte
