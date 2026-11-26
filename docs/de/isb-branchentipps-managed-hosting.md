@@ -52,12 +52,12 @@ Für Hosting-Anbieter schaut der Auditor besonders genau auf folgende ISO-27001-
 * **`A.8.19` (Installation von Software auf Betriebssystemen) & `A.8.32` (Change Management):** Belegen Sie durch Verweis auf Ihr Ticketsystem, wie Notfall-Changes freigegeben und nachvollziehbar ausgerollt werden.
 * **`A.5.24` / `A.5.25` (Incident Management):** Hinterlegen Sie Ihre Bewertungsmatrix, ab wann ein Sicherheitsereignis zum Incident eskaliert wird.
 
-### Schritt G: Compliance-Kalender (`Actions`)
+### Abschnitt G: Compliance-Kalender (`Actions`)
 * Ergänzen Sie die Standard-Serienaufgaben um eine **quartalsweise Stichprobenprüfung (`quarterly`)**: *„Abgleich Software-Inventar (PHP/Java/OS-Versionen) aller Kundenumgebungen auf veraltete/EOL-Versionen und Prüfung der letzten Emergency-Patch-Tickets“*.
 
 ---
 
-## 4. Audit-Tipp: Was Prüfer bei Hostern besonders gern fragen könnten
+## 4. Audit-Tipp: Was Prüfer bei Hosting-Anbietern besonders gern fragen könnten
 * **„Wie stellen Sie sicher, dass Sie kein Kundensystem vergessen?“** → Zeigen Sie Ihr zentrales Monitoring, Asset-Inventar oder Konfigurationsmanagement (z. B. Ansible, Puppet, etc.) als Nachweis zu `A.5.9` und `A.8.8`.
 * **„Zeigen Sie mir einen Fall, bei dem es schnell gehen musste.“** → Halten Sie 1–2 gut dokumentierte Tickets (z. B. zur letzten großen PHP-, Java- oder OpenSSL-Lücke) griffbereit, an denen man *Erkennung → Inventarabgleich → Patch → IoC-Check → Kundeninfo* lückenlos nachvollziehen kann.
 * **„Wo endet Ihre Pflicht und wo beginnt die Pflicht des Kunden?“** → Halten Sie eine klare **RACI-Matrix** (*Shared Responsibility*) bereit, die die Zuständigkeiten nach Technologie-Schicht abgrenzt:
